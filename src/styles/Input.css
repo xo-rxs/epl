@@ -1,0 +1,198 @@
+/* Input 컴포넌트 스타일 */
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+}
+
+.input-group label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-700);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* ===== Input Field ===== */
+.input-field {
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.input-field::placeholder {
+  color: var(--color-gray-400);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+}
+
+.input-field:disabled {
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-500);
+  cursor: not-allowed;
+}
+
+/* ===== Input Sizes ===== */
+.input-sm {
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+}
+
+.input-lg {
+  padding: var(--spacing-4) var(--spacing-5);
+  font-size: var(--font-size-lg);
+}
+
+/* ===== Input States ===== */
+
+/* Error State */
+.input-field.error {
+  border-color: var(--color-error);
+  background-color: rgba(231, 76, 60, 0.02);
+}
+
+.input-field.error:focus {
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+/* Success State */
+.input-field.success {
+  border-color: var(--color-success);
+}
+
+.input-field.success:focus {
+  box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+}
+
+/* ===== Error Message ===== */
+.input-error {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-1);
+}
+
+/* ===== Helper Text ===== */
+.input-hint {
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-1);
+}
+
+/* ===== Input Icon ===== */
+.input-icon-left {
+  padding-left: var(--spacing-10);
+}
+
+.input-icon-right {
+  padding-right: var(--spacing-10);
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--color-gray-500);
+  pointer-events: none;
+}
+
+.input-icon.left {
+  left: 0;
+}
+
+.input-icon.right {
+  right: 0;
+}
+
+/* ===== Textarea ===== */
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ===== Select ===== */
+.select-field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right var(--spacing-3) center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: var(--spacing-10);
+}
+
+/* ===== Checkbox & Radio ===== */
+.checkbox-group,
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.checkbox,
+.radio {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  cursor: pointer;
+}
+
+.checkbox input[type="checkbox"],
+.radio input[type="radio"] {
+  cursor: pointer;
+}
+
+.checkbox label,
+.radio label {
+  margin: 0;
+  font-weight: var(--font-weight-normal);
+  cursor: pointer;
+}
+
+/* ===== Input Group (With Button) ===== */
+.input-addon-group {
+  display: flex;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-gray-300);
+  overflow: hidden;
+}
+
+.input-addon-group .input-field {
+  border: none;
+  flex: 1;
+  border-radius: 0;
+}
+
+.input-addon-group .input-field:focus {
+  box-shadow: none;
+}
+
+.input-addon-group button {
+  border: none;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: background-color var(--transition-base);
+}
+
+.input-addon-group button:hover {
+  background-color: var(--color-gray-200);
+}

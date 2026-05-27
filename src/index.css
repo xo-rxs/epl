@@ -1,0 +1,11 @@
+@import './styles/variables.css';
+@import './styles/globals.css';
+@import './styles/Button.css';
+@import './styles/Card.css';
+@import './styles/Input.css';
+@import './styles/Header.css';
+@import './styles/Layout.css';
+@import './styles/TeamBuilder.css';
+@import './styles/SoccerField.css';
+@import './styles/PlayerDraggable.css';
+@import './styles/TacticsBoard.css';

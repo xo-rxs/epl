@@ -1,0 +1,224 @@
+/* ParticipantList 컴포넌트 스타일 */
+
+.participant-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.participant-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-gray-50);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-base);
+  transition: all var(--transition-base);
+}
+
+.participant-item:hover {
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-300);
+}
+
+/* 번호 */
+.participant-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+/* 정보 */
+.participant-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.participant-name {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  font-size: var(--font-size-base);
+  margin-bottom: var(--spacing-1);
+}
+
+.participant-meta {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.participant-year,
+.participant-position {
+  display: inline-block;
+  padding: var(--spacing-1) var(--spacing-2);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-600);
+}
+
+.participant-year {
+  background-color: rgba(52, 152, 219, 0.1);
+  border-color: rgba(52, 152, 219, 0.3);
+  color: #0066cc;
+}
+
+.participant-position {
+  background-color: rgba(46, 204, 113, 0.1);
+  border-color: rgba(46, 204, 113, 0.3);
+  color: #00a84f;
+}
+
+.participant-status {
+  display: inline-block;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  border: 1px solid transparent;
+}
+
+.participant-status-pending {
+  background-color: rgba(243, 156, 18, 0.1);
+  border-color: rgba(243, 156, 18, 0.35);
+  color: #b26a00;
+}
+
+.participant-status-approved {
+  background-color: rgba(39, 174, 96, 0.12);
+  border-color: rgba(39, 174, 96, 0.35);
+  color: #1f8f52;
+}
+
+.participant-status-rejected {
+  background-color: rgba(231, 76, 60, 0.12);
+  border-color: rgba(231, 76, 60, 0.35);
+  color: #c0392b;
+}
+
+.participant-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.participant-action-btn {
+  border: none;
+  padding: 6px 10px;
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.participant-action-btn.approve {
+  background-color: rgba(39, 174, 96, 0.14);
+  color: #1f8f52;
+}
+
+.participant-action-btn.reject {
+  background-color: rgba(231, 76, 60, 0.14);
+  color: #c0392b;
+}
+
+.participant-action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.participant-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.participant-tabs {
+  display: inline-flex;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1);
+  border-radius: var(--radius-full);
+  background-color: var(--color-gray-100);
+  border: 1px solid var(--color-gray-200);
+}
+
+.participant-tab-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.participant-tab-btn.is-active {
+  background: var(--color-white);
+  box-shadow: var(--shadow-xs);
+  color: var(--color-gray-900);
+}
+
+/* 제거 버튼 */
+.participant-remove-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-700);
+  border: none;
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  flex-shrink: 0;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+}
+
+.participant-remove-btn:hover:not(:disabled) {
+  background-color: var(--color-error);
+  color: var(--color-white);
+}
+
+.participant-remove-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.participant-remove-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 반응형 */
+@media (max-width: 640px) {
+  .participant-item {
+    padding: var(--spacing-2) var(--spacing-3);
+    gap: var(--spacing-2);
+  }
+
+  .participant-number {
+    width: 28px;
+    height: 28px;
+    font-size: var(--font-size-sm);
+  }
+
+  .participant-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .participant-remove-btn {
+    width: 28px;
+    height: 28px;
+    font-size: var(--font-size-base);
+  }
+}

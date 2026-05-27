@@ -1,0 +1,131 @@
+/* Card 컴포넌트 스타일 */
+
+.card {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-gray-300);
+}
+
+.card.interactive {
+  cursor: pointer;
+}
+
+.card.interactive:hover {
+  transform: translateY(-2px);
+}
+
+/* ===== Card Header ===== */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.card-header-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+}
+
+/* ===== Card Body ===== */
+.card-body {
+  margin-bottom: var(--spacing-4);
+}
+
+.card-body:last-child {
+  margin-bottom: 0;
+}
+
+/* ===== Card Footer ===== */
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--color-gray-200);
+}
+
+/* ===== Card Variants ===== */
+
+/* Primary Card */
+.card-primary {
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.05), transparent);
+}
+
+.card-primary .card-header {
+  border-bottom-color: var(--color-primary);
+}
+
+/* Team A Card (Blue) */
+.card-team-a {
+  border-left: 4px solid var(--color-team-a);
+  background-color: rgba(52, 152, 219, 0.02);
+}
+
+/* Team B Card (Red) */
+.card-team-b {
+  border-left: 4px solid var(--color-team-b);
+  background-color: rgba(231, 76, 60, 0.02);
+}
+
+/* ===== Card Sizes ===== */
+
+.card-sm {
+  padding: var(--spacing-4);
+}
+
+.card-lg {
+  padding: var(--spacing-8);
+}
+
+/* ===== Compact Card ===== */
+.card-compact {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-base);
+}
+
+.card-compact .card-header {
+  margin-bottom: var(--spacing-2);
+  padding-bottom: var(--spacing-2);
+}
+
+/* ===== Card Grid ===== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-6);
+}
+
+@media (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===== Disabled Card ===== */
+.card.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  background-color: var(--color-gray-100);
+}

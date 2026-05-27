@@ -1,0 +1,51 @@
+.player-draggable {
+  width: 100%;
+  min-height: 34px;
+  padding: 4px 6px 5px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-900);
+  background: #f5f7f4;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+  cursor: grab;
+  user-select: none;
+}
+
+.player-draggable-a {
+  border: 1px solid rgba(52, 152, 219, 0.7);
+  background: rgba(219, 236, 249, 0.9);
+}
+
+.player-draggable-b {
+  border: 1px solid rgba(231, 76, 60, 0.7);
+  background: rgba(250, 226, 222, 0.9);
+}
+
+.player-draggable.is-dragging {
+  opacity: 0.28;
+  cursor: grabbing;
+}
+
+.player-draggable.is-overlay {
+  width: 92px;
+  pointer-events: none;
+}
+
+.player-draggable-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 72px;
+}
+
+.player-draggable-meta {
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-700);
+}
