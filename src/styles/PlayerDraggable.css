@@ -1,8 +1,8 @@
 .player-draggable {
-  width: 100%;
-  min-height: 34px;
-  padding: 4px 6px 5px;
-  border-radius: var(--radius-sm);
+  width: 64px;
+  height: 64px;
+  padding: 6px;
+  border-radius: 999px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -33,7 +33,8 @@
 }
 
 .player-draggable.is-overlay {
-  width: 92px;
+  width: 72px;
+  height: 72px;
   pointer-events: none;
 }
 
@@ -41,7 +42,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 72px;
+  max-width: 54px;
 }
 
 .player-draggable-meta {

@@ -1,7 +1,7 @@
 .soccer-field {
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 13 / 20;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background:
@@ -27,9 +27,12 @@
 
 .soccer-field-svg {
   position: absolute;
-  inset: 0;
+  left: 50%;
+  top: 50%;
   width: 100%;
   height: 100%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  transform-origin: 50% 50%;
 }
 
 .soccer-field-border {

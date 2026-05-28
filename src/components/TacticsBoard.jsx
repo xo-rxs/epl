@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef, useState } from 'react';
+import { useMemo, useEffect, useRef, useState, useCallback } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -6,6 +6,7 @@ import {
   MouseSensor,
   TouchSensor,
   closestCenter,
+  pointerWithin,
   useSensor,
   useSensors,
   useDroppable,
@@ -33,16 +34,6 @@ const FIELD_POSITIONS = [
 
 const mirrorX = (x) => 100 - x;
 
-const buildFieldSlots = (teamId, positions) =>
-  positions.map((slot) => ({
-    id: `${teamId}_${slot.id}`,
-    label: slot.label,
-    team: teamId,
-    type: 'field',
-    x: teamId === 'A' ? slot.x : mirrorX(slot.x),
-    y: slot.y,
-  }));
-
 const buildBenchSlots = (teamId, count) =>
   Array.from({ length: count }).map((_, index) => ({
     id: `${teamId}_BENCH_${index + 1}`,
@@ -57,17 +48,36 @@ const getAverageSkill = (players) => {
   return total / players.length;
 };
 
-const buildInitialAssignments = (teams, slotsByTeam) => {
-  const assignments = {};
+const clampPercent = (value, min = 4, max = 96) => Math.min(max, Math.max(min, value));
+
+const buildInitialPlacements = (teams, benchSlotsByTeam, positions) => {
+  const placements = {};
 
   Object.entries(teams).forEach(([teamId, players]) => {
-    const slotIds = slotsByTeam[teamId].map((slot) => slot.id);
+    const benchSlots = benchSlotsByTeam[teamId] || [];
     players.forEach((player, index) => {
-      assignments[player.id] = slotIds[index] || slotIds[slotIds.length - 1];
+      if (index < positions.length) {
+        const position = positions[index];
+        placements[player.id] = {
+          area: 'field',
+          x: teamId === 'A' ? position.x : mirrorX(position.x),
+          y: position.y,
+        };
+        return;
+      }
+
+      const benchIndex = index - positions.length;
+      const benchSlot = benchSlots[benchIndex] || benchSlots[benchSlots.length - 1];
+      if (benchSlot) {
+        placements[player.id] = {
+          area: 'bench',
+          benchSlotId: benchSlot.id,
+        };
+      }
     });
   });
 
-  return assignments;
+  return placements;
 };
 
 const createFilenamePrefix = (title) => {
@@ -91,7 +101,19 @@ const dropAnimation = {
   }),
 };
 
-function PositionSlot({ slot, children }) {
+const fieldFirstCollisionDetection = (args) => {
+  const pointerCollisions = pointerWithin(args);
+  if (pointerCollisions.length) {
+    const fieldCollision = pointerCollisions.find((collision) =>
+      String(collision.id).startsWith('field-')
+    );
+    return fieldCollision ? [fieldCollision] : pointerCollisions;
+  }
+
+  return closestCenter(args);
+};
+
+function BenchSlot({ slot, children }) {
   const { setNodeRef, isOver } = useDroppable({ id: slot.id });
 
   const slotClassName = [
@@ -103,24 +125,37 @@ function PositionSlot({ slot, children }) {
     .filter(Boolean)
     .join(' ');
 
-  const style =
-    slot.type === 'field'
-      ? {
-          left: `${slot.x}%`,
-          top: `${slot.y}%`,
-        }
-      : undefined;
-
   return (
-    <div ref={setNodeRef} className={slotClassName} style={style}>
+    <div ref={setNodeRef} className={slotClassName}>
       <div className="tactics-board-slot-label">{slot.label}</div>
       <div className="tactics-board-slot-content">{children}</div>
     </div>
   );
 }
 
+function FieldDropArea({ team, fieldRef, children }) {
+  const { setNodeRef, isOver } = useDroppable({ id: `field-${team}` });
+
+  const setRefs = useCallback(
+    (node) => {
+      setNodeRef(node);
+      fieldRef.current = node;
+    },
+    [setNodeRef, fieldRef]
+  );
+
+  const className = ['tactics-board-field', isOver && 'is-over'].filter(Boolean).join(' ');
+
+  return (
+    <div ref={setRefs} className={className}>
+      {children}
+    </div>
+  );
+}
+
 function TacticsBoard({ match }) {
   const boardRef = useRef(null);
+  const fieldAreaRef = useRef(null);
   const [activeId, setActiveId] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
   const [viewTeam, setViewTeam] = useState('A');
@@ -132,31 +167,28 @@ function TacticsBoard({ match }) {
   const benchSizeA = Math.max(4, teamA.length - FIELD_POSITIONS.length);
   const benchSizeB = Math.max(4, teamB.length - FIELD_POSITIONS.length);
 
-  const fieldSlotsA = useMemo(() => buildFieldSlots('A', FIELD_POSITIONS), []);
-  const fieldSlotsB = useMemo(() => buildFieldSlots('B', FIELD_POSITIONS), []);
-
   const benchSlotsA = useMemo(() => buildBenchSlots('A', benchSizeA), [benchSizeA]);
   const benchSlotsB = useMemo(() => buildBenchSlots('B', benchSizeB), [benchSizeB]);
 
-  const slotsByTeam = useMemo(
+  const benchSlotsByTeam = useMemo(
     () => ({
-      A: [...fieldSlotsA, ...benchSlotsA],
-      B: [...fieldSlotsB, ...benchSlotsB],
+      A: benchSlotsA,
+      B: benchSlotsB,
     }),
-    [benchSlotsA, benchSlotsB, fieldSlotsA, fieldSlotsB]
+    [benchSlotsA, benchSlotsB]
   );
 
-  const allSlots = useMemo(
-    () => [...fieldSlotsA, ...fieldSlotsB, ...benchSlotsA, ...benchSlotsB],
-    [benchSlotsA, benchSlotsB, fieldSlotsA, fieldSlotsB]
+  const allBenchSlots = useMemo(
+    () => [...benchSlotsA, ...benchSlotsB],
+    [benchSlotsA, benchSlotsB]
   );
 
   const slotById = useMemo(() => {
-    return allSlots.reduce((acc, slot) => {
+    return allBenchSlots.reduce((acc, slot) => {
       acc[slot.id] = slot;
       return acc;
     }, {});
-  }, [allSlots]);
+  }, [allBenchSlots]);
 
   const players = useMemo(() => [...teamA, ...teamB], [teamA, teamB]);
 
@@ -178,20 +210,22 @@ function TacticsBoard({ match }) {
     return map;
   }, [teamA, teamB]);
 
-  const [playerSlots, setPlayerSlots] = useState(() =>
-    buildInitialAssignments({ A: teamA, B: teamB }, slotsByTeam)
+  const [playerPlacements, setPlayerPlacements] = useState(() =>
+    buildInitialPlacements({ A: teamA, B: teamB }, benchSlotsByTeam, FIELD_POSITIONS)
   );
 
   useEffect(() => {
-    setPlayerSlots(buildInitialAssignments({ A: teamA, B: teamB }, slotsByTeam));
-  }, [teamA, teamB, slotsByTeam]);
+    setPlayerPlacements(buildInitialPlacements({ A: teamA, B: teamB }, benchSlotsByTeam, FIELD_POSITIONS));
+  }, [teamA, teamB, benchSlotsByTeam]);
 
-  const slotToPlayer = useMemo(() => {
-    return Object.entries(playerSlots).reduce((acc, [playerId, slotId]) => {
-      acc[slotId] = playerId;
+  const benchSlotToPlayer = useMemo(() => {
+    return Object.entries(playerPlacements).reduce((acc, [playerId, placement]) => {
+      if (placement?.area === 'bench' && placement.benchSlotId) {
+        acc[placement.benchSlotId] = playerId;
+      }
       return acc;
     }, {});
-  }, [playerSlots]);
+  }, [playerPlacements]);
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
@@ -199,9 +233,17 @@ function TacticsBoard({ match }) {
   );
 
   const activePlayer = activeId ? playerById[activeId] : null;
-  const visibleFieldSlots = viewTeam === 'A' ? fieldSlotsA : fieldSlotsB;
   const visibleBenchSlots = viewTeam === 'A' ? benchSlotsA : benchSlotsB;
   const visibleTeamLabel = viewTeam === 'A' ? '팀 A' : '팀 B';
+  const visibleFieldPlayers = useMemo(() => {
+    return players
+      .filter((player) => playerTeamMap[player.id] === viewTeam)
+      .map((player) => ({
+        player,
+        placement: playerPlacements[player.id],
+      }))
+      .filter(({ placement }) => placement?.area === 'field');
+  }, [players, playerPlacements, playerTeamMap, viewTeam]);
 
   const handleDragStart = (event) => {
     setActiveId(event.active?.id || null);
@@ -214,23 +256,54 @@ function TacticsBoard({ match }) {
     if (!over) return;
 
     const activePlayerId = active.id;
+    const playerTeam = playerTeamMap[activePlayerId];
+    if (!playerTeam) return;
+
+    if (over.id === `field-${playerTeam}`) {
+      const rect = active.rect?.current?.translated || active.rect?.current?.initial;
+      const fieldRect = fieldAreaRef.current?.getBoundingClientRect();
+      if (!rect || !fieldRect || !fieldRect.width || !fieldRect.height) return;
+
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const x = clampPercent(((centerX - fieldRect.left) / fieldRect.width) * 100);
+      const y = clampPercent(((centerY - fieldRect.top) / fieldRect.height) * 100);
+
+      setPlayerPlacements((prev) => ({
+        ...prev,
+        [activePlayerId]: { area: 'field', x, y },
+      }));
+      return;
+    }
+
     const targetSlotId = over.id;
     const targetSlot = slotById[targetSlotId];
 
     if (!targetSlot) return;
-
-    const playerTeam = playerTeamMap[activePlayerId];
     if (targetSlot.team !== playerTeam) return;
 
-    setPlayerSlots((prev) => {
+    setPlayerPlacements((prev) => {
       const next = { ...prev };
-      const previousSlotId = prev[activePlayerId];
-      const occupiedPlayerId = Object.entries(prev).find(([, slotId]) => slotId === targetSlotId)?.[0];
+      const previousPlacement = prev[activePlayerId];
+      const occupiedPlayerId = Object.entries(prev).find(
+        ([, placement]) => placement?.area === 'bench' && placement.benchSlotId === targetSlotId
+      )?.[0];
 
-      next[activePlayerId] = targetSlotId;
+      next[activePlayerId] = { area: 'bench', benchSlotId: targetSlotId };
 
       if (occupiedPlayerId && occupiedPlayerId !== activePlayerId) {
-        next[occupiedPlayerId] = previousSlotId;
+        if (previousPlacement?.area === 'bench' && previousPlacement.benchSlotId) {
+          next[occupiedPlayerId] = {
+            area: 'bench',
+            benchSlotId: previousPlacement.benchSlotId,
+          };
+        } else if (previousPlacement?.area === 'field') {
+          next[occupiedPlayerId] = {
+            area: 'field',
+            x: previousPlacement.x,
+            y: previousPlacement.y,
+          };
+        }
       }
 
       return next;
@@ -327,37 +400,42 @@ function TacticsBoard({ match }) {
 
           <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
+            collisionDetection={fieldFirstCollisionDetection}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            <SoccerField>
-              {visibleFieldSlots.map((slot) => (
-                <PositionSlot key={slot.id} slot={slot}>
-                  {slotToPlayer[slot.id] && (
-                    <PlayerDraggable
-                      player={playerById[slotToPlayer[slot.id]]}
-                      team={viewTeam}
-                    />
-                  )}
-                </PositionSlot>
-              ))}
-            </SoccerField>
+            <div className="tactics-board-layout">
+              <div className="tactics-board-field-column">
+                <SoccerField>
+                  <FieldDropArea team={viewTeam} fieldRef={fieldAreaRef}>
+                    {visibleFieldPlayers.map(({ player, placement }) => (
+                      <div
+                        key={player.id}
+                        className="tactics-board-field-player"
+                        style={{ left: `${placement.x}%`, top: `${placement.y}%` }}
+                      >
+                        <PlayerDraggable player={player} team={viewTeam} />
+                      </div>
+                    ))}
+                  </FieldDropArea>
+                </SoccerField>
+              </div>
 
-            <div className="tactics-board-bench">
-              <div className="tactics-board-bench-column">
-                <h4 className="tactics-board-bench-title">{visibleTeamLabel} 벤치</h4>
-                <div className="tactics-board-bench-list">
-                  {visibleBenchSlots.map((slot) => (
-                    <PositionSlot key={slot.id} slot={slot}>
-                      {slotToPlayer[slot.id] && (
-                        <PlayerDraggable
-                          player={playerById[slotToPlayer[slot.id]]}
-                          team={viewTeam}
-                        />
-                      )}
-                    </PositionSlot>
-                  ))}
+              <div className="tactics-board-bench">
+                <div className="tactics-board-bench-column">
+                  <h4 className="tactics-board-bench-title">{visibleTeamLabel} 벤치</h4>
+                  <div className="tactics-board-bench-list">
+                    {visibleBenchSlots.map((slot) => (
+                      <BenchSlot key={slot.id} slot={slot}>
+                        {benchSlotToPlayer[slot.id] && (
+                          <PlayerDraggable
+                            player={playerById[benchSlotToPlayer[slot.id]]}
+                            team={viewTeam}
+                          />
+                        )}
+                      </BenchSlot>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

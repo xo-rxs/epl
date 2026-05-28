@@ -6,7 +6,7 @@ function SoccerField({ children }) {
       <svg
         className="soccer-field-svg"
         viewBox="0 0 1000 650"
-        preserveAspectRatio="none"
+        preserveAspectRatio="xMidYMid slice"
         aria-hidden="true"
       >
         <rect x="15" y="15" width="970" height="620" rx="18" className="soccer-field-border" />
