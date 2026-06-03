@@ -71,10 +71,13 @@ function ParticipantList({
           <div key={participant.id} className="participant-item">
             <div className="participant-number">{index + 1}</div>
             <div className="participant-info">
-              <div className="participant-name">{participant.nickname}</div>
+              <div className="participant-name">{participant.name || participant.nickname}</div>
               <div className="participant-meta">
-                <span className="participant-year">{participant.year}학년</span>
+                <span className="participant-year">
+                  {participant.age ? `${participant.age}세` : `${participant.year}학년`}
+                </span>
                 <span className="participant-position">{participant.position}</span>
+                <span className="participant-position">실력 {participant.skillScore || 3}</span>
                 <span className={`participant-status participant-status-${status}`}>
                   {statusLabels[status] || '대기'}
                 </span>
@@ -105,7 +108,7 @@ function ParticipantList({
                 <button
                   className="participant-remove-btn"
                   onClick={() => {
-                    if (window.confirm(`${participant.nickname}을(를) 제거하시겠습니까?`)) {
+                    if (window.confirm(`${participant.name || participant.nickname}을(를) 제거하시겠습니까?`)) {
                       onRemove(participant.id);
                     }
                   }}

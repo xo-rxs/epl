@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef, useState, useCallback } from 'react';
+import { useMemo, useRef, useState, useCallback } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -19,20 +19,68 @@ import { downloadElementAsPng, shareElementImage } from '../utils/imageExport';
 import '../styles/TacticsBoard.css';
 
 const FIELD_POSITIONS = [
-  { id: 'GK', label: 'GK', x: 10, y: 50 },
-  { id: 'LB', label: 'LB', x: 22, y: 18 },
-  { id: 'LCB', label: 'LCB', x: 22, y: 38 },
-  { id: 'RCB', label: 'RCB', x: 22, y: 62 },
-  { id: 'RB', label: 'RB', x: 22, y: 82 },
-  { id: 'LCM', label: 'LCM', x: 40, y: 28 },
-  { id: 'CM', label: 'CM', x: 42, y: 50 },
-  { id: 'RCM', label: 'RCM', x: 40, y: 72 },
-  { id: 'LW', label: 'LW', x: 60, y: 20 },
-  { id: 'ST', label: 'ST', x: 64, y: 50 },
-  { id: 'RW', label: 'RW', x: 60, y: 80 },
+  { id: 'GK', label: 'GK', x: 50, y: 90 },
+  { id: 'LB', label: 'LB', x: 18, y: 78 },
+  { id: 'LCB', label: 'LCB', x: 36, y: 78 },
+  { id: 'RCB', label: 'RCB', x: 64, y: 78 },
+  { id: 'RB', label: 'RB', x: 82, y: 78 },
+  { id: 'LCM', label: 'LCM', x: 30, y: 52 },
+  { id: 'CM', label: 'CM', x: 50, y: 52 },
+  { id: 'RCM', label: 'RCM', x: 70, y: 52 },
+  { id: 'LW', label: 'LW', x: 24, y: 26 },
+  { id: 'ST', label: 'ST', x: 50, y: 26 },
+  { id: 'RW', label: 'RW', x: 76, y: 26 },
 ];
 
-const mirrorX = (x) => 100 - x;
+const EMPTY_PLAYERS = [];
+
+const FIELD_SECTIONS = [
+  { id: 'LW', label: 'LW', xMin: 0, xMax: 34, yMin: 0, yMax: 34 },
+  { id: 'ST', label: 'ST', xMin: 34, xMax: 66, yMin: 0, yMax: 34 },
+  { id: 'RW', label: 'RW', xMin: 66, xMax: 100, yMin: 0, yMax: 34 },
+  { id: 'LW_HIGH', label: 'LW', xMin: 0, xMax: 30, yMin: 34, yMax: 46 },
+  { id: 'CAM', label: 'CAM', xMin: 30, xMax: 70, yMin: 34, yMax: 46 },
+  { id: 'RW_HIGH', label: 'RW', xMin: 70, xMax: 100, yMin: 34, yMax: 46 },
+  { id: 'LCM', label: 'LCM', xMin: 0, xMax: 34, yMin: 46, yMax: 58 },
+  { id: 'CM', label: 'CM', xMin: 34, xMax: 66, yMin: 46, yMax: 58 },
+  { id: 'RCM', label: 'RCM', xMin: 66, xMax: 100, yMin: 46, yMax: 58 },
+  { id: 'LWB', label: 'LWB', xMin: 0, xMax: 30, yMin: 58, yMax: 70 },
+  { id: 'CDM', label: 'CDM', xMin: 30, xMax: 70, yMin: 58, yMax: 70 },
+  { id: 'RWB', label: 'RWB', xMin: 70, xMax: 100, yMin: 58, yMax: 70 },
+  { id: 'LB', label: 'LB', xMin: 0, xMax: 26, yMin: 70, yMax: 84 },
+  { id: 'LCB', label: 'LCB', xMin: 26, xMax: 44, yMin: 70, yMax: 84 },
+  { id: 'CB', label: 'CB', xMin: 44, xMax: 56, yMin: 70, yMax: 84 },
+  { id: 'RCB', label: 'RCB', xMin: 56, xMax: 74, yMin: 70, yMax: 84 },
+  { id: 'RB', label: 'RB', xMin: 74, xMax: 100, yMin: 70, yMax: 84 },
+  { id: 'GK', label: 'GK', xMin: 0, xMax: 100, yMin: 84, yMax: 100 },
+];
+
+const mirrorY = (y) => 100 - y;
+
+const getSectionForPoint = (x, y, teamId) => {
+  const normalizedY = teamId === 'B' ? mirrorY(y) : y;
+  return (
+    FIELD_SECTIONS.find(
+      (section) =>
+        x >= section.xMin &&
+        x < section.xMax &&
+        normalizedY >= section.yMin &&
+        normalizedY < section.yMax
+    ) || FIELD_SECTIONS[FIELD_SECTIONS.length - 1]
+  );
+};
+
+const getSectionStyle = (section, teamId) => {
+  const yMin = teamId === 'B' ? 100 - section.yMax : section.yMin;
+  const yMax = teamId === 'B' ? 100 - section.yMin : section.yMax;
+
+  return {
+    left: `${section.xMin}%`,
+    top: `${yMin}%`,
+    width: `${section.xMax - section.xMin}%`,
+    height: `${yMax - yMin}%`,
+  };
+};
 
 const buildBenchSlots = (teamId, count) =>
   Array.from({ length: count }).map((_, index) => ({
@@ -58,10 +106,14 @@ const buildInitialPlacements = (teams, benchSlotsByTeam, positions) => {
     players.forEach((player, index) => {
       if (index < positions.length) {
         const position = positions[index];
+        const y = teamId === 'A' ? position.y : mirrorY(position.y);
+        const section = getSectionForPoint(position.x, y, teamId);
         placements[player.id] = {
           area: 'field',
-          x: teamId === 'A' ? position.x : mirrorX(position.x),
-          y: position.y,
+          x: position.x,
+          y,
+          positionId: section.id,
+          positionLabel: section.label,
         };
         return;
       }
@@ -148,6 +200,17 @@ function FieldDropArea({ team, fieldRef, children }) {
 
   return (
     <div ref={setRefs} className={className}>
+      <div className="tactics-board-field-sections" aria-hidden="true">
+        {FIELD_SECTIONS.map((section) => (
+          <div
+            key={section.id}
+            className="tactics-board-field-section"
+            style={getSectionStyle(section, team)}
+          >
+            <span>{section.label}</span>
+          </div>
+        ))}
+      </div>
       {children}
     </div>
   );
@@ -161,8 +224,8 @@ function TacticsBoard({ match }) {
   const [viewTeam, setViewTeam] = useState('A');
 
   const teamAssignment = match?.teamAssignment;
-  const teamA = teamAssignment?.teamA || [];
-  const teamB = teamAssignment?.teamB || [];
+  const teamA = teamAssignment?.teamA || EMPTY_PLAYERS;
+  const teamB = teamAssignment?.teamB || EMPTY_PLAYERS;
 
   const benchSizeA = Math.max(4, teamA.length - FIELD_POSITIONS.length);
   const benchSizeB = Math.max(4, teamB.length - FIELD_POSITIONS.length);
@@ -210,13 +273,19 @@ function TacticsBoard({ match }) {
     return map;
   }, [teamA, teamB]);
 
-  const [playerPlacements, setPlayerPlacements] = useState(() =>
-    buildInitialPlacements({ A: teamA, B: teamB }, benchSlotsByTeam, FIELD_POSITIONS)
+  const initialPlacements = useMemo(
+    () => buildInitialPlacements({ A: teamA, B: teamB }, benchSlotsByTeam, FIELD_POSITIONS),
+    [teamA, teamB, benchSlotsByTeam]
   );
 
-  useEffect(() => {
-    setPlayerPlacements(buildInitialPlacements({ A: teamA, B: teamB }, benchSlotsByTeam, FIELD_POSITIONS));
-  }, [teamA, teamB, benchSlotsByTeam]);
+  const [placementOverrides, setPlacementOverrides] = useState({});
+
+  const playerPlacements = useMemo(() => {
+    return players.reduce((acc, player) => {
+      acc[player.id] = placementOverrides[player.id] || initialPlacements[player.id];
+      return acc;
+    }, {});
+  }, [initialPlacements, placementOverrides, players]);
 
   const benchSlotToPlayer = useMemo(() => {
     return Object.entries(playerPlacements).reduce((acc, [playerId, placement]) => {
@@ -268,10 +337,17 @@ function TacticsBoard({ match }) {
       const centerY = rect.top + rect.height / 2;
       const x = clampPercent(((centerX - fieldRect.left) / fieldRect.width) * 100);
       const y = clampPercent(((centerY - fieldRect.top) / fieldRect.height) * 100);
+      const section = getSectionForPoint(x, y, playerTeam);
 
-      setPlayerPlacements((prev) => ({
+      setPlacementOverrides((prev) => ({
         ...prev,
-        [activePlayerId]: { area: 'field', x, y },
+        [activePlayerId]: {
+          area: 'field',
+          x,
+          y,
+          positionId: section.id,
+          positionLabel: section.label,
+        },
       }));
       return;
     }
@@ -282,8 +358,12 @@ function TacticsBoard({ match }) {
     if (!targetSlot) return;
     if (targetSlot.team !== playerTeam) return;
 
-    setPlayerPlacements((prev) => {
-      const next = { ...prev };
+    setPlacementOverrides((prevOverrides) => {
+      const prev = players.reduce((acc, player) => {
+        acc[player.id] = prevOverrides[player.id] || initialPlacements[player.id];
+        return acc;
+      }, {});
+      const next = { ...prevOverrides };
       const previousPlacement = prev[activePlayerId];
       const occupiedPlayerId = Object.entries(prev).find(
         ([, placement]) => placement?.area === 'bench' && placement.benchSlotId === targetSlotId
@@ -302,6 +382,8 @@ function TacticsBoard({ match }) {
             area: 'field',
             x: previousPlacement.x,
             y: previousPlacement.y,
+            positionId: previousPlacement.positionId,
+            positionLabel: previousPlacement.positionLabel,
           };
         }
       }
@@ -415,6 +497,9 @@ function TacticsBoard({ match }) {
                         style={{ left: `${placement.x}%`, top: `${placement.y}%` }}
                       >
                         <PlayerDraggable player={player} team={viewTeam} />
+                        <span className="tactics-board-position-badge">
+                          {placement.positionLabel || getSectionForPoint(placement.x, placement.y, viewTeam).label}
+                        </span>
                       </div>
                     ))}
                   </FieldDropArea>

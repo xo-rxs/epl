@@ -4,6 +4,7 @@ import { Layout, Container, Card, Button } from './components';
 import MatchPage from './pages/MatchPage';
 import TeamPage from './pages/TeamPage';
 import ReviewPage from './pages/ReviewPage';
+import AuthPage from './pages/AuthPage';
 
 /**
  * App 메인 컴포넌트
@@ -25,6 +26,11 @@ function App() {
 
       if (page === 'reviews') {
         setCurrentPage('reviews');
+        return;
+      }
+
+      if (page === 'auth') {
+        setCurrentPage('auth');
         return;
       }
 
@@ -174,6 +180,10 @@ function App() {
     return <ReviewPage />;
   };
 
+  const renderAuth = () => {
+    return <AuthPage />;
+  };
+
   // 페이지 렌더링
   if (currentPage === 'teams') {
     return renderTeams();
@@ -185,6 +195,10 @@ function App() {
 
   if (currentPage === 'reviews') {
     return renderReviews();
+  }
+
+  if (currentPage === 'auth') {
+    return renderAuth();
   }
 
   return renderHome();

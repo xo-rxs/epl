@@ -106,8 +106,8 @@ function ReviewPage() {
       const entry = entries[participant.id] || { rating: 3, tags: [] };
       return {
         participantId: participant.id,
-        nickname: participant.nickname,
-        year: participant.year,
+        nickname: participant.name || participant.nickname,
+        age: participant.age,
         position: participant.position,
         rating: Number(entry.rating) || 3,
         tags: entry.tags || [],
@@ -198,9 +198,9 @@ function ReviewPage() {
                             }}
                           >
                             <div style={{ marginBottom: 'var(--spacing-3)' }}>
-                              <strong>{participant.nickname}</strong>
+                              <strong>{participant.name || participant.nickname}</strong>
                               <span style={{ marginLeft: 'var(--spacing-2)', color: 'var(--color-gray-600)' }}>
-                                {participant.year}학년 · {participant.position}
+                                {participant.age ? `${participant.age}세` : `${participant.year}학년`} · {participant.position}
                               </span>
                               <div style={{ marginTop: 'var(--spacing-2)', color: 'var(--color-gray-600)' }}>
                                 {currentIndex + 1} / {approvedParticipants.length}

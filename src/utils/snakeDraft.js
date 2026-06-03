@@ -34,7 +34,7 @@ export const runSnakeDraft = (participants) => {
   const prepared = shuffle(participants).sort((a, b) => {
     const skillGap = Number(b.skillScore || 3) - Number(a.skillScore || 3);
     if (skillGap !== 0) return skillGap;
-    return Number(a.year || 0) - Number(b.year || 0);
+    return Number(a.age || a.year || 0) - Number(b.age || b.year || 0);
   });
 
   const teamA = [];

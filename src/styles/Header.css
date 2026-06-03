@@ -81,6 +81,22 @@
   gap: var(--spacing-4);
 }
 
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.header-user-name {
+  max-width: 120px;
+  overflow: hidden;
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ===== Mobile Menu Button ===== */
 .header-menu-btn {
   display: none;
@@ -127,5 +143,13 @@
     padding: var(--spacing-4);
     gap: var(--spacing-3);
     box-shadow: var(--shadow-md);
+  }
+
+  .header-actions {
+    gap: var(--spacing-2);
+  }
+
+  .header-user-name {
+    max-width: 72px;
   }
 }

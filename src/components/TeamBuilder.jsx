@@ -9,7 +9,7 @@ import '../styles/TeamBuilder.css';
  * 참가자 목록을 스네이크 드래프트로 두 팀으로 나눈다.
  */
 function TeamBuilder({ participants = [], onConfirmTeams, confirmedAt }) {
-  const [yearWeight, setYearWeight] = useState(0.6);
+  const [ageWeight, setAgeWeight] = useState(0.6);
   const [iterations, setIterations] = useState(30);
   const [refreshSeed, setRefreshSeed] = useState(0);
 
@@ -17,18 +17,18 @@ function TeamBuilder({ participants = [], onConfirmTeams, confirmedAt }) {
     return participants.map((p) => ({
       ...p,
       skillScore: Number(p.skillScore || 3),
-      year: Number(p.year || 1),
+      age: Number(p.age || p.year || 20),
     }));
   }, [participants]);
 
   const result = useMemo(() => {
     if (normalizedParticipants.length < 2) return null;
     return buildBalancedTeams(normalizedParticipants, {
-      yearWeight,
+      yearWeight: ageWeight,
       iterations,
       seed: refreshSeed,
     });
-  }, [normalizedParticipants, yearWeight, iterations, refreshSeed]);
+  }, [normalizedParticipants, ageWeight, iterations, refreshSeed]);
 
   if (participants.length < 2) {
     return (
@@ -43,14 +43,14 @@ function TeamBuilder({ participants = [], onConfirmTeams, confirmedAt }) {
       <Card header={<h3 className="card-header-title">🤖 Snake Draft 팀 빌딩</h3>}>
         <div className="team-builder-controls">
           <label className="team-builder-label">
-            학년 가중치 ({Number(yearWeight).toFixed(1)})
+            나이 가중치 ({Number(ageWeight).toFixed(1)})
             <input
               type="range"
               min="0"
               max="2"
               step="0.1"
-              value={yearWeight}
-              onChange={(e) => setYearWeight(Number(e.target.value))}
+              value={ageWeight}
+              onChange={(e) => setAgeWeight(Number(e.target.value))}
             />
           </label>
 
@@ -90,9 +90,9 @@ function TeamBuilder({ participants = [], onConfirmTeams, confirmedAt }) {
             <div className="team-builder-metrics">
               <div>총 밸런스 점수: <strong>{result.metrics.score.toFixed(2)}</strong></div>
               <div>실력 차이: <strong>{result.metrics.skillDiff.toFixed(2)}</strong></div>
-              <div>학년 페널티: <strong>{result.metrics.yearPenalty.toFixed(2)}</strong></div>
-              <div>팀 A 평균 학년: <strong>{result.metrics.avgYearA.toFixed(2)}</strong></div>
-              <div>팀 B 평균 학년: <strong>{result.metrics.avgYearB.toFixed(2)}</strong></div>
+              <div>나이 페널티: <strong>{result.metrics.yearPenalty.toFixed(2)}</strong></div>
+              <div>팀 A 평균 나이: <strong>{result.metrics.avgYearA.toFixed(2)}</strong></div>
+              <div>팀 B 평균 나이: <strong>{result.metrics.avgYearB.toFixed(2)}</strong></div>
             </div>
           </Card>
 
@@ -101,9 +101,9 @@ function TeamBuilder({ participants = [], onConfirmTeams, confirmedAt }) {
               <ul className="team-builder-list">
                 {result.teamA.map((player) => (
                   <li key={player.id} className="team-builder-player">
-                    <span>{player.nickname}</span>
+                    <span>{player.name || player.nickname}</span>
                     <span className="team-builder-badge">{player.position}</span>
-                    <span className="team-builder-badge">{player.year}학년</span>
+                    <span className="team-builder-badge">{player.age}세</span>
                     <span className="team-builder-badge">실력 {player.skillScore}</span>
                   </li>
                 ))}
@@ -114,9 +114,9 @@ function TeamBuilder({ participants = [], onConfirmTeams, confirmedAt }) {
               <ul className="team-builder-list">
                 {result.teamB.map((player) => (
                   <li key={player.id} className="team-builder-player">
-                    <span>{player.nickname}</span>
+                    <span>{player.name || player.nickname}</span>
                     <span className="team-builder-badge">{player.position}</span>
-                    <span className="team-builder-badge">{player.year}학년</span>
+                    <span className="team-builder-badge">{player.age}세</span>
                     <span className="team-builder-badge">실력 {player.skillScore}</span>
                   </li>
                 ))}

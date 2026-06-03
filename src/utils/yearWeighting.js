@@ -1,16 +1,19 @@
 /**
- * 학년 편향 보정 유틸리티
+ * 나이 편향 보정 유틸리티
  */
 
 /**
- * 팀 평균 학년 계산
+ * 팀 평균 나이 계산
  * @param {Array} team - 팀 참가자 배열
  * @returns {number}
  */
 export const getAverageYear = (team) => {
   if (!team || team.length === 0) return 0;
-  const totalYear = team.reduce((sum, player) => sum + Number(player.year || 0), 0);
-  return totalYear / team.length;
+  const totalAge = team.reduce(
+    (sum, player) => sum + Number(player.age || player.year || 0),
+    0
+  );
+  return totalAge / team.length;
 };
 
 /**
@@ -24,10 +27,10 @@ export const getTotalSkill = (team) => {
 };
 
 /**
- * 학년 편차 페널티 계산
+ * 나이 편차 페널티 계산
  * @param {Array} teamA
  * @param {Array} teamB
- * @param {number} yearWeight - 학년 페널티 가중치
+ * @param {number} yearWeight - 나이 페널티 가중치
  * @returns {number}
  */
 export const getYearBalancePenalty = (teamA, teamB, yearWeight = 0.6) => {

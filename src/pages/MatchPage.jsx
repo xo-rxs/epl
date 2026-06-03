@@ -9,7 +9,7 @@ import {
   TeamBuilder,
   Button,
 } from '../components';
-import { useMatchData } from '../hooks';
+import { useAuthData, useMatchData } from '../hooks';
 
 /**
  * MatchPage 컴포넌트
@@ -25,6 +25,7 @@ function MatchPage() {
     deleteMatch,
     updateParticipant,
   } = useMatchData();
+  const { currentUser } = useAuthData();
   const [currentMatch, setCurrentMatch] = useState(null);
   const [selectedMatchId, setSelectedMatchId] = useState(null);
   const [currentView, setCurrentView] = useState('list');
@@ -116,10 +117,24 @@ function MatchPage() {
 
     setLoading(true);
     try {
+      const alreadyJoined = (currentMatch.participants || []).some(
+        (participant) =>
+          participant.userId === formData.userId &&
+          getStatus(participant) !== 'rejected'
+      );
+
+      if (alreadyJoined) {
+        alert('이미 참여 신청한 경기입니다.');
+        return;
+      }
+
       addParticipant(currentMatch.id, {
-        nickname: formData.nickname,
-        year: parseInt(formData.year, 10),
+        userId: formData.userId,
+        name: formData.name,
+        nickname: formData.name,
+        age: parseInt(formData.age, 10),
         position: formData.position,
+        skillTier: formData.skillTier,
         skillScore: parseInt(formData.skillScore, 10),
       });
 
@@ -271,6 +286,7 @@ function MatchPage() {
 
                 <ParticipantForm
                   onSubmit={handleAddParticipant}
+                  currentUser={currentUser}
                   currentCount={(currentMatch.participants || []).filter((p) => getStatus(p) !== 'rejected').length}
                   maxCount={currentMatch.maxParticipants || 20}
                   loading={loading}

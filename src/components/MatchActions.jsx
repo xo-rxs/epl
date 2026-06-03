@@ -15,9 +15,10 @@ function MatchActions({ match, onStatusChange, onDelete }) {
   const handleExportCSV = () => {
     const csvData = match.participants.map((p, index) => ({
       '순서': index + 1,
-      '닉네임': p.nickname,
-      '학년': p.year,
+      '이름': p.name || p.nickname,
+      '나이': p.age || '',
       '포지션': p.position,
+      '스킬티어': p.skillTier || '',
       '실력점수': p.skillScore || 3,
       '참여시간': new Date(p.joinedAt).toLocaleString('ko-KR'),
     }));

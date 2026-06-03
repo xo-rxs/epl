@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import '../styles/Header.css';
 import Button from './Button';
+import { useAuthData } from '../hooks';
 
 /**
  * Header 컴포넌트
@@ -18,6 +19,7 @@ function Header({
   actions,
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { currentUser, logout } = useAuthData();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -51,7 +53,29 @@ function Header({
         )}
 
         {/* 액션 버튼들 */}
-        {actions && <div className="header-actions">{actions}</div>}
+        <div className="header-actions">
+          {actions}
+          {currentUser ? (
+            <div className="header-user">
+              <a href="/?page=auth" className="header-user-name">
+                {currentUser.name || currentUser.nickname}
+              </a>
+              <Button variant="secondary" size="sm" onClick={logout}>
+                로그아웃
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                window.location.href = '/?page=auth';
+              }}
+            >
+              로그인
+            </Button>
+          )}
+        </div>
 
         {/* 모바일 메뉴 버튼 */}
         {navItems.length > 0 && (
