@@ -1,6 +1,7 @@
 import './styles/globals.css';
+import './styles/Home.css';
 import { useState, useEffect } from 'react';
-import { Layout, Container, Card, Button } from './components';
+import { Layout, Button } from './components';
 import MatchPage from './pages/MatchPage';
 import TeamPage from './pages/TeamPage';
 import ReviewPage from './pages/ReviewPage';
@@ -19,36 +20,23 @@ function App() {
       const params = new URLSearchParams(window.location.search);
       const page = params.get('page');
 
-      if (page === 'teams') {
-        setCurrentPage('teams');
-        return;
-      }
-
-      if (page === 'reviews') {
-        setCurrentPage('reviews');
-        return;
-      }
-
-      if (page === 'auth') {
-        setCurrentPage('auth');
-        return;
-      }
-
-      if (params.has('matchId') || page === 'match') {
-        setCurrentPage('match');
-        return;
-      }
+      if (page === 'teams') { setCurrentPage('teams'); return; }
+      if (page === 'reviews') { setCurrentPage('reviews'); return; }
+      if (page === 'auth') { setCurrentPage('auth'); return; }
+      if (params.has('matchId') || page === 'match') { setCurrentPage('match'); return; }
 
       setCurrentPage('home');
     };
 
     syncPageFromUrl();
     window.addEventListener('popstate', syncPageFromUrl);
-
-    return () => {
-      window.removeEventListener('popstate', syncPageFromUrl);
-    };
+    return () => window.removeEventListener('popstate', syncPageFromUrl);
   }, []);
+
+  const navigateTo = (page, url) => {
+    setCurrentPage(page);
+    window.history.pushState(null, '', url);
+  };
 
   // 홈페이지
   const renderHome = () => {
@@ -63,12 +51,9 @@ function App() {
       <Button
         variant="primary"
         size="sm"
-        onClick={() => {
-          setCurrentPage('match');
-          window.history.pushState(null, '', '/?page=match');
-        }}
+        onClick={() => navigateTo('match', '/?page=match')}
       >
-        지금 시작하기
+        시작하기
       </Button>
     );
 
@@ -80,126 +65,133 @@ function App() {
       actions: headerActions,
     };
 
+    const features = [
+      {
+        icon: '📝',
+        title: '매치 모집',
+        desc: '경기 정보를 입력하면 참여 폼이 자동 생성됩니다. 링크 공유만으로 실시간 참여 현황을 확인하세요.',
+        color: '#2ecc71',
+        page: 'match',
+        url: '/?page=match',
+      },
+      {
+        icon: '🤖',
+        title: '자동 팀 배정',
+        desc: 'Snake Draft 알고리즘이 실력·학년을 균형 있게 고려해 공정한 팀을 자동으로 구성합니다.',
+        color: '#3498db',
+        page: 'teams',
+        url: '/?page=teams',
+      },
+      {
+        icon: '🎯',
+        title: '전술 배치도',
+        desc: '팀원 아이콘을 드래그해 포지션을 배치하고, PNG 이미지로 저장해 바로 공유하세요.',
+        color: '#9b59b6',
+        page: 'teams',
+        url: '/?page=teams',
+      },
+      {
+        icon: '⭐',
+        title: '별점 리뷰',
+        desc: '경기 후 상호 평가로 신뢰도 기반 커뮤니티를 만들어 갑니다. 레이더 차트로 성장을 확인하세요.',
+        color: '#f39c12',
+        page: 'reviews',
+        url: '/?page=reviews',
+      },
+    ];
+
+    const stats = [
+      { value: '80%', label: '인원 관리 시간 단축' },
+      { value: '공정', label: '알고리즘 팀 배정' },
+      { value: '즉시', label: '링크 공유 참여 취합' },
+    ];
+
     return (
       <Layout headerProps={headerProps}>
-        {/* 헤로 섹션 */}
-        <section style={{ marginBottom: 'var(--spacing-12)', textAlign: 'center' }}>
-          <h1 style={{ fontSize: 'var(--font-size-4xl)', marginBottom: 'var(--spacing-4)' }}>
-            축구 경기를 더 똑똑하게 관리하세요
+        {/* 히어로 섹션 */}
+        <section className="home-hero">
+          <div className="home-hero__badge">⚽ Easy Pick League</div>
+          <h1 className="home-hero__title">
+            아마추어 축구,<br />
+            <span className="home-hero__accent">스마트하게</span> 운영하세요
           </h1>
-          <p style={{ fontSize: 'var(--font-size-lg)', color: 'var(--color-gray-600)', marginBottom: 'var(--spacing-6)' }}>
-            자동 팀 배정, 시각적 전술도, 신뢰도 기반 평가 시스템으로
-            <br />
-            공정하고 투명한 경기 운영을 경험하세요.
+          <p className="home-hero__desc">
+            총무의 인원 관리 시간을 80% 줄여주는 자동화 플랫폼.<br />
+            참여 취합부터 팀 배정, 전술도, 별점 리뷰까지 한 번에.
           </p>
+          <div className="home-hero__actions">
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => navigateTo('match', '/?page=match')}
+            >
+              경기 만들기
+            </Button>
+            <button
+              className="home-hero__ghost-btn"
+              onClick={() => navigateTo('teams', '/?page=teams')}
+            >
+              팀 배정 보기 →
+            </button>
+          </div>
+
+          {/* 통계 배지 */}
+          <div className="home-stats">
+            {stats.map((s) => (
+              <div key={s.label} className="home-stats__item">
+                <span className="home-stats__value">{s.value}</span>
+                <span className="home-stats__label">{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 기능 카드 섹션 */}
+        <section className="home-features">
+          <div className="home-features__header">
+            <h2 className="home-features__title">주요 기능</h2>
+            <p className="home-features__subtitle">필요한 모든 것을 하나의 플랫폼에서</p>
+          </div>
+          <div className="home-features__grid">
+            {features.map((f) => (
+              <button
+                key={f.title}
+                className="home-feature-card"
+                onClick={() => navigateTo(f.page, f.url)}
+              >
+                <div className="home-feature-card__icon" style={{ background: f.color + '18', color: f.color }}>
+                  {f.icon}
+                </div>
+                <h3 className="home-feature-card__title">{f.title}</h3>
+                <p className="home-feature-card__desc">{f.desc}</p>
+                <span className="home-feature-card__cta" style={{ color: f.color }}>
+                  바로가기 →
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA 섹션 */}
+        <section className="home-cta">
+          <h2 className="home-cta__title">지금 바로 시작해보세요</h2>
+          <p className="home-cta__desc">설치 없이, 로그인 없이. 링크 하나로 모든 팀원이 참여합니다.</p>
           <Button
             variant="primary"
             size="lg"
-            onClick={() => {
-              setCurrentPage('match');
-              window.history.pushState(null, '', '/?page=match');
-            }}
+            onClick={() => navigateTo('match', '/?page=match')}
           >
-            지금 시작하기
+            무료로 경기 만들기
           </Button>
-        </section>
-
-        <Container size="sm">
-          {/* 기능 카드 */}
-          <section style={{ marginBottom: 'var(--spacing-12)' }}>
-            <h2 style={{ fontSize: 'var(--font-size-2xl)', marginBottom: 'var(--spacing-6)', textAlign: 'center' }}>
-              주요 기능
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--spacing-6)' }}>
-              <Card header={<h3 className="card-header-title">📝 매치 모집</h3>}>
-                <p>경기 정보를 입력하고 참여자를 실시간으로 수집합니다.</p>
-              </Card>
-
-              <Card variant="primary" header={<h3 className="card-header-title">🤖 자동 팀 배정</h3>}>
-                <p>실력과 학년을 고려한 공정한 팀 배분 알고리즘입니다.</p>
-              </Card>
-
-              <Card header={<h3 className="card-header-title">🎯 전술 배치도</h3>}>
-                <p>드래그로 포지션을 배치하고 이미지로 저장하세요.</p>
-              </Card>
-
-              <Card header={<h3 className="card-header-title">⭐ 별점 평가</h3>}>
-                <p>경기 후 상호 평가로 신뢰도 높은 커뮤니티를 만듭니다.</p>
-              </Card>
-            </div>
-          </section>
-        </Container>
-
-        {/* 팀 구성 미리보기 */}
-        <section
-          style={{
-            backgroundColor: 'var(--color-gray-50)',
-            padding: 'var(--spacing-12)',
-            marginTop: 'var(--spacing-12)',
-            marginLeft: 'calc(-50vw + 50%)',
-            marginRight: 'calc(-50vw + 50%)',
-          }}
-        >
-          <Container>
-            <h2 style={{ fontSize: 'var(--font-size-2xl)', marginBottom: 'var(--spacing-6)', textAlign: 'center' }}>
-              팀 배정 미리보기
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--spacing-6)' }}>
-              <Card variant="team-a" header={<h3 className="card-header-title">🔵 팀 A</h3>}>
-                <ul style={{ paddingLeft: 'var(--spacing-4)' }}>
-                  <li>선수 1 (FW)</li>
-                  <li>선수 2 (MF)</li>
-                  <li>선수 3 (DF)</li>
-                </ul>
-              </Card>
-              <Card variant="team-b" header={<h3 className="card-header-title">🔴 팀 B</h3>}>
-                <ul style={{ paddingLeft: 'var(--spacing-4)' }}>
-                  <li>선수 4 (FW)</li>
-                  <li>선수 5 (MF)</li>
-                  <li>선수 6 (DF)</li>
-                </ul>
-              </Card>
-            </div>
-          </Container>
         </section>
       </Layout>
     );
   };
 
-  // 경기 페이지
-  const renderMatch = () => {
-    return <MatchPage />;
-  };
-
-  // 팀 구성 페이지
-  const renderTeams = () => {
-    return <TeamPage />;
-  };
-
-  const renderReviews = () => {
-    return <ReviewPage />;
-  };
-
-  const renderAuth = () => {
-    return <AuthPage />;
-  };
-
-  // 페이지 렌더링
-  if (currentPage === 'teams') {
-    return renderTeams();
-  }
-
-  if (currentPage === 'match') {
-    return renderMatch();
-  }
-
-  if (currentPage === 'reviews') {
-    return renderReviews();
-  }
-
-  if (currentPage === 'auth') {
-    return renderAuth();
-  }
+  if (currentPage === 'teams') return <TeamPage />;
+  if (currentPage === 'match') return <MatchPage />;
+  if (currentPage === 'reviews') return <ReviewPage />;
+  if (currentPage === 'auth') return <AuthPage />;
 
   return renderHome();
 }
