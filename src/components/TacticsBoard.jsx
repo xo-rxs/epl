@@ -339,16 +339,56 @@ function TacticsBoard({ match }) {
       const y = clampPercent(((centerY - fieldRect.top) / fieldRect.height) * 100);
       const section = getSectionForPoint(x, y, playerTeam);
 
-      setPlacementOverrides((prev) => ({
-        ...prev,
-        [activePlayerId]: {
-          area: 'field',
-          x,
-          y,
-          positionId: section.id,
-          positionLabel: section.label,
-        },
-      }));
+      setPlacementOverrides((prevOverrides) => {
+        const prev = players.reduce((acc, player) => {
+          acc[player.id] = prevOverrides[player.id] || initialPlacements[player.id];
+          return acc;
+        }, {});
+
+        // 드롭 위치 근처(9% 이내)에 같은 팀 필드 선수가 있으면 자리 교체
+        const SWAP_THRESHOLD = 9;
+        const nearbyPlayerId = Object.entries(prev).find(([pid, placement]) => {
+          if (pid === activePlayerId) return false;
+          if (playerTeamMap[pid] !== playerTeam) return false;
+          if (placement?.area !== 'field') return false;
+          return Math.abs(placement.x - x) < SWAP_THRESHOLD && Math.abs(placement.y - y) < SWAP_THRESHOLD;
+        })?.[0];
+
+        const next = { ...prevOverrides };
+        const activePrev = prev[activePlayerId];
+
+        if (nearbyPlayerId) {
+          const nearbyPlacement = prev[nearbyPlayerId];
+          // 드래그한 선수를 상대 위치로
+          next[activePlayerId] = {
+            area: 'field',
+            x: nearbyPlacement.x,
+            y: nearbyPlacement.y,
+            positionId: nearbyPlacement.positionId,
+            positionLabel: nearbyPlacement.positionLabel,
+          };
+          // 기존 선수를 드래그한 선수의 원래 위치로
+          next[nearbyPlayerId] = activePrev?.area === 'bench'
+            ? { area: 'bench', benchSlotId: activePrev.benchSlotId }
+            : {
+                area: 'field',
+                x: activePrev.x,
+                y: activePrev.y,
+                positionId: activePrev.positionId,
+                positionLabel: activePrev.positionLabel,
+              };
+        } else {
+          next[activePlayerId] = {
+            area: 'field',
+            x,
+            y,
+            positionId: section.id,
+            positionLabel: section.label,
+          };
+        }
+
+        return next;
+      });
       return;
     }
 
