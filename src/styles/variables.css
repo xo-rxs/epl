@@ -4,6 +4,7 @@
 */
 
 :root {
+  color-scheme: light;
   /* 색상 - Primary (축구 테마) */
   --color-primary: #2ecc71;
   --color-primary-dark: #27ae60;
