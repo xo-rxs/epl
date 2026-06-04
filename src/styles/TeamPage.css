@@ -1,0 +1,176 @@
+/* ===== TeamPage ===== */
+
+.team-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+  padding-top: var(--spacing-4);
+}
+
+.team-page-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  margin: 0 0 var(--spacing-1);
+}
+
+.team-page-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+}
+
+/* 저장 토스트 */
+.team-page-toast {
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-5);
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  border-radius: var(--radius-base);
+  color: var(--color-primary-dark);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  animation: fade-in 0.2s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 빈 상태 */
+.team-page-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-16);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.team-page-empty span {
+  font-size: 3rem;
+}
+
+.team-page-empty p {
+  color: var(--color-gray-500);
+}
+
+.team-page-empty a {
+  color: var(--color-primary-dark);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: underline;
+}
+
+/* 바디 영역 */
+.team-page-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+/* 경기 선택 */
+.team-page-match-select {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-5) var(--spacing-6);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.team-page-select-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-gray-500);
+}
+
+.team-page-select-wrap {
+  position: relative;
+}
+
+.team-page-select {
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-10) var(--spacing-3) var(--spacing-4);
+  border: 1.5px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-900);
+  appearance: none;
+  cursor: pointer;
+  transition: border-color var(--transition-base);
+}
+
+.team-page-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.12);
+}
+
+.team-page-select-icon {
+  position: absolute;
+  right: var(--spacing-4);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-gray-400);
+  pointer-events: none;
+  font-size: var(--font-size-sm);
+}
+
+.team-page-match-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+}
+
+.team-page-match-badge {
+  background: rgba(46, 204, 113, 0.1);
+  color: var(--color-primary-dark);
+  border: 1px solid rgba(46, 204, 113, 0.25);
+  border-radius: var(--radius-full);
+  padding: 2px var(--spacing-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* 전술 배치도 잠금 */
+.team-page-tactics-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-10);
+  background: var(--color-white);
+  border: 1px dashed var(--color-gray-300);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.team-page-tactics-locked span {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+
+.team-page-tactics-locked p {
+  color: var(--color-gray-400);
+  font-size: var(--font-size-sm);
+}
+
+@media (max-width: 640px) {
+  .team-page-match-select {
+    padding: var(--spacing-4);
+  }
+}

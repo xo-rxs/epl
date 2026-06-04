@@ -1,61 +1,336 @@
+/* ===== TeamBuilder ===== */
+
 .team-builder-root {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-4);
+  gap: var(--spacing-5);
 }
 
-.team-builder-controls {
+/* ── 컨트롤 카드 ── */
+.tb-control-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+}
+
+.tb-control-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+.tb-control-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  margin: 0 0 var(--spacing-1);
+}
+
+.tb-control-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+}
+
+.tb-control-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* ── 슬라이더 ── */
+.tb-sliders {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--spacing-4);
-  align-items: end;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-6);
 }
 
-.team-builder-label {
+.tb-slider-item {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
+}
+
+.tb-slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-700);
 }
 
-.team-builder-empty {
-  color: var(--color-gray-600);
+.tb-slider-value {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-dark);
+  background: rgba(46, 204, 113, 0.1);
+  padding: 2px var(--spacing-2);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
 }
 
+.tb-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-400);
+}
+
+.tb-saved-at {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-dark);
+  background: rgba(46, 204, 113, 0.08);
+  border: 1px solid rgba(46, 204, 113, 0.2);
+  border-radius: var(--radius-base);
+  padding: var(--spacing-2) var(--spacing-4);
+}
+
+/* ── 밸런스 지표 ── */
+.tb-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-3);
+}
+
+.tb-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-4) var(--spacing-3);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  text-align: center;
+  box-shadow: var(--shadow-xs);
+}
+
+.tb-stat-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  line-height: 1;
+}
+
+.tb-stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-500);
+  line-height: 1.3;
+}
+
+.tb-stat-sub {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-400);
+}
+
+/* ── 팀 그리드 ── */
 .team-builder-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: var(--spacing-4);
 }
 
-.team-builder-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
+/* ── 팀 카드 ── */
+.tb-team-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
-.team-builder-player {
+.tb-team-a {
+  border-top: 3px solid #3498db;
+}
+
+.tb-team-b {
+  border-top: 3px solid #e74c3c;
+}
+
+.tb-team-header {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  flex-wrap: wrap;
-  padding: var(--spacing-2) var(--spacing-3);
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-base);
-  background-color: var(--color-gray-50);
+  padding: var(--spacing-4) var(--spacing-5);
+  border-bottom: 1px solid var(--color-gray-100);
+  background: var(--color-gray-50);
 }
 
-.team-builder-badge {
+.tb-team-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.tb-team-header h3 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  margin: 0;
+}
+
+.tb-team-count {
   font-size: var(--font-size-xs);
-  background: var(--color-white);
-  border: 1px solid var(--color-gray-300);
-  border-radius: var(--radius-sm);
-  padding: 2px 6px;
+  color: var(--color-gray-500);
+  background: var(--color-gray-200);
+  padding: 2px var(--spacing-2);
+  border-radius: var(--radius-full);
+  margin-left: var(--spacing-1);
 }
 
-.team-builder-metrics {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-2);
+.tb-team-avg {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-600);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ── 선수 목록 ── */
+.tb-player-list {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-2);
+  gap: var(--spacing-1);
+}
+
+.tb-player-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-3);
+  border-radius: var(--radius-base);
+  transition: background var(--transition-fast);
+}
+
+.tb-player-row:hover {
+  background: var(--color-gray-50);
+}
+
+.tb-player-rank {
+  width: 20px;
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-400);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.tb-player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.tb-player-name {
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tb-player-age {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-400);
+}
+
+.tb-position-badge {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+/* ── 실력 점수 dots ── */
+.tb-skill-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.tb-skill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-gray-200);
+  transition: background var(--transition-fast);
+}
+
+.tb-skill-dot.is-filled {
+  background: var(--color-primary);
+}
+
+.tb-skill-num {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-400);
+  margin-left: 3px;
+}
+
+/* ── 빈 상태 ── */
+.tb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-12);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.tb-empty span {
+  font-size: 2.5rem;
+}
+
+.tb-empty p {
+  color: var(--color-gray-500);
+  font-size: var(--font-size-sm);
+}
+
+/* ── 반응형 ── */
+@media (max-width: 768px) {
+  .tb-sliders {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+  }
+
+  .tb-metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .team-builder-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tb-control-header {
+    flex-direction: column;
+  }
+
+  .tb-control-actions {
+    width: 100%;
+  }
+
+  .tb-control-actions > * {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .tb-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

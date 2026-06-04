@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Layout, Container, Card, TacticsBoard } from '../components';
+import { Layout, Container, TacticsBoard } from '../components';
 import TeamBuilder from '../components/TeamBuilder';
 import { useMatchData } from '../hooks';
+import '../styles/TeamPage.css';
 
 /**
  * TeamPage 컴포넌트
@@ -10,6 +11,7 @@ import { useMatchData } from '../hooks';
 function TeamPage() {
   const { matches, updateMatch } = useMatchData();
   const [selectedMatchId, setSelectedMatchId] = useState(matches[0]?.id || '');
+  const [savedMsg, setSavedMsg] = useState('');
 
   const selectedMatch = useMemo(() => {
     return matches.find((m) => m.id === selectedMatchId) || null;
@@ -18,7 +20,7 @@ function TeamPage() {
   const approvedParticipants = useMemo(() => {
     if (!selectedMatch) return [];
     return (selectedMatch.participants || []).filter(
-      (participant) => (participant.status || 'approved') === 'approved'
+      (p) => (p.status || 'approved') === 'approved'
     );
   }, [selectedMatch]);
 
@@ -34,7 +36,8 @@ function TeamPage() {
       },
     });
 
-    alert('팀 구성이 저장되었습니다!');
+    setSavedMsg('팀 구성이 저장되었습니다! ✅');
+    setTimeout(() => setSavedMsg(''), 3000);
   };
 
   const headerProps = {
@@ -42,7 +45,7 @@ function TeamPage() {
     subtitle: 'Easy Pick League',
     logo: '⚽',
     navItems: [
-      { label: '홈', href: '/', active: false },
+      { label: '홈', href: '/' },
       { label: '경기', href: '/?page=match' },
       { label: '팀 구성', href: '/?page=teams', active: true },
       { label: '평가', href: '/?page=reviews' },
@@ -52,57 +55,75 @@ function TeamPage() {
   return (
     <Layout headerProps={headerProps}>
       <Container>
-        <h2 style={{ fontSize: 'var(--font-size-2xl)', marginBottom: 'var(--spacing-4)' }}>
-          팀 구성
-        </h2>
+        {/* 페이지 헤더 */}
+        <div className="team-page-header">
+          <div>
+            <h2 className="team-page-title">팀 구성</h2>
+            <p className="team-page-desc">Snake Draft 알고리즘으로 균형 잡힌 팀을 자동 배정합니다.</p>
+          </div>
+        </div>
+
+        {savedMsg && (
+          <div className="team-page-toast">{savedMsg}</div>
+        )}
 
         {matches.length === 0 ? (
-          <Card header={<h3 className="card-header-title">안내</h3>}>
-            <p>먼저 경기와 참여자를 등록해주세요. 등록 후 팀 구성 기능을 사용할 수 있습니다.</p>
-          </Card>
+          <div className="team-page-empty">
+            <span>⚽</span>
+            <p>먼저 경기와 참여자를 등록해주세요.</p>
+            <a href="/?page=match">경기 만들러 가기 →</a>
+          </div>
         ) : (
-          <>
-            <Card header={<h3 className="card-header-title">경기 선택</h3>}>
-              <select
-                value={selectedMatchId}
-                onChange={(e) => setSelectedMatchId(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: 'var(--spacing-3) var(--spacing-4)',
-                  border: '1px solid var(--color-gray-300)',
-                  borderRadius: 'var(--radius-base)',
-                }}
-              >
-                {matches.map((match) => (
-                  <option key={match.id} value={match.id}>
-                    {match.title} ({match.participants.length}/{match.maxParticipants})
-                  </option>
-                ))}
-              </select>
-            </Card>
-
-            {selectedMatch && (
-              <div style={{ marginTop: 'var(--spacing-6)' }}>
-                <TeamBuilder
-                  participants={approvedParticipants}
-                  onConfirmTeams={handleConfirmTeams}
-                  confirmedAt={selectedMatch.teamAssignment?.savedAt}
-                />
+          <div className="team-page-body">
+            {/* 경기 선택 */}
+            <div className="team-page-match-select">
+              <label className="team-page-select-label">경기 선택</label>
+              <div className="team-page-select-wrap">
+                <select
+                  value={selectedMatchId}
+                  onChange={(e) => setSelectedMatchId(e.target.value)}
+                  className="team-page-select"
+                >
+                  {matches.map((match) => (
+                    <option key={match.id} value={match.id}>
+                      {match.title} ({match.participants.length}/{match.maxParticipants})
+                    </option>
+                  ))}
+                </select>
+                <span className="team-page-select-icon">▾</span>
               </div>
+              {selectedMatch && (
+                <div className="team-page-match-meta">
+                  <span>📍 {selectedMatch.location}</span>
+                  <span>👥 {approvedParticipants.length}명 참가</span>
+                  {selectedMatch.teamAssignment && (
+                    <span className="team-page-match-badge">팀 확정됨</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 팀 빌더 */}
+            {selectedMatch && (
+              <TeamBuilder
+                participants={approvedParticipants}
+                onConfirmTeams={handleConfirmTeams}
+                confirmedAt={selectedMatch.teamAssignment?.savedAt}
+              />
             )}
 
+            {/* 전술 배치도 */}
             {selectedMatch && (
-              <div style={{ marginTop: 'var(--spacing-6)' }}>
-                {selectedMatch.teamAssignment ? (
-                  <TacticsBoard match={selectedMatch} />
-                ) : (
-                  <Card header={<h3 className="card-header-title">🧩 전술 배치도</h3>}>
-                    <p>팀 구성을 확정하면 전술 배치도를 사용할 수 있습니다.</p>
-                  </Card>
-                )}
-              </div>
+              selectedMatch.teamAssignment ? (
+                <TacticsBoard match={selectedMatch} />
+              ) : (
+                <div className="team-page-tactics-locked">
+                  <span>🧩</span>
+                  <p>팀 구성을 확정하면 전술 배치도를 사용할 수 있습니다.</p>
+                </div>
+              )
             )}
-          </>
+          </div>
         )}
       </Container>
     </Layout>
