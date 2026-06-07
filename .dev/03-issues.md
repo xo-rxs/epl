@@ -1,5 +1,24 @@
 # Issues
 
+## 2026-06-04
+
+### [해결] OS 다크 모드에서 폼/시스템 색상 반전으로 가독성 깨짐
+- 증상: OS가 다크 모드일 때 입력창·드롭다운 등이 자동 반전되어 흰 배경에 흰 글씨 발생
+- 원인: 브라우저가 prefers-color-scheme: dark 감지 시 폼 컨트롤을 다크 팔레트로 렌더링
+- 해결:
+  - src/styles/variables.css :root에 color-scheme: light 선언
+  - index.html <head>에 <meta name="color-scheme" content="light"> 추가(초기 페인트 단계 반전 차단)
+- 상태: 해결 완료
+
+### [해결] 벤치 → 필드 드롭 시 기존 선수와 좌표 겹침
+- 증상: 점유된 필드 위치로 선수를 드롭하면 두 선수가 같은 좌표에 겹쳐 한 명이 사라짐
+- 원인: 드래그한 선수 좌표만 갱신하고 기존 선수를 옮기지 않음
+- 해결:
+  - 드롭 위치 9% 반경 내 같은 팀 필드 선수를 탐색해 위치 맞교환(swap)
+  - 드래그 선수의 직전 상태(activePrev)가 벤치/필드인지 분기해 교체 대상 복원
+  - 매 드롭마다 전체 배치 상태를 prev로 재구성 후 한 번에 setPlacementOverrides
+- 상태: 해결 완료
+
 ## 2026-04-24
 
 ### [해결] Vite import-analysis 경로 오류
