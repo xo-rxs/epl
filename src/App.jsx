@@ -6,6 +6,7 @@ import MatchPage from './pages/MatchPage';
 import TeamPage from './pages/TeamPage';
 import ReviewPage from './pages/ReviewPage';
 import AuthPage from './pages/AuthPage';
+import SchedulePage from './pages/SchedulePage';
 
 /**
  * App 메인 컴포넌트
@@ -22,6 +23,7 @@ function App() {
 
       if (page === 'teams') { setCurrentPage('teams'); return; }
       if (page === 'reviews') { setCurrentPage('reviews'); return; }
+      if (page === 'schedule') { setCurrentPage('schedule'); return; }
       if (page === 'auth') { setCurrentPage('auth'); return; }
       if (params.has('matchId') || page === 'match') { setCurrentPage('match'); return; }
 
@@ -43,6 +45,7 @@ function App() {
     const navItems = [
       { label: '홈', href: '/', active: true },
       { label: '경기', href: '/?page=match' },
+      { label: '일정', href: '/?page=schedule' },
       { label: '팀 구성', href: '/?page=teams' },
       { label: '평가', href: '/?page=reviews' },
     ];
@@ -191,6 +194,7 @@ function App() {
   if (currentPage === 'teams') return <TeamPage />;
   if (currentPage === 'match') return <MatchPage />;
   if (currentPage === 'reviews') return <ReviewPage />;
+  if (currentPage === 'schedule') return <SchedulePage />;
   if (currentPage === 'auth') return <AuthPage />;
 
   return renderHome();

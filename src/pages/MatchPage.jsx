@@ -218,6 +218,7 @@ function MatchPage() {
     navItems: [
       { label: '홈', href: '/', active: false },
       { label: '경기', href: '/?page=match', active: true },
+      { label: '일정', href: '/?page=schedule' },
       { label: '팀 구성', href: '/?page=teams' },
       { label: '평가', href: '/?page=reviews' },
     ],
