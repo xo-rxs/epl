@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-06-08
+
+### 작업 내용
+- 일정확인(내 일정) 기능 추가: 월 캘린더 + 내가 참여한 경기만 표시
+- SchedulePage 신규 및 전 페이지 네비게이션에 "일정" 탭 추가
+
+### 주요 변경 파일
+- src/pages/SchedulePage.jsx (신규)
+- src/styles/SchedulePage.css (신규)
+- src/App.jsx
+- src/pages/MatchPage.jsx
+- src/pages/TeamPage.jsx
+- src/pages/ReviewPage.jsx
+
+### 검증 결과
+- npm run build: 성공
+- 브라우저 확인: 캘린더 렌더/날짜 선택/경기 카드/모바일 반응형 정상
+- 상세: today-dev/2026-06-08-devlog.md 참고
+
 ## 2026-04-24
 
 ### 작업 내용

@@ -222,6 +222,7 @@ function ReviewPage() {
     navItems: [
       { label: '홈', href: '/' },
       { label: '경기', href: '/?page=match' },
+      { label: '일정', href: '/?page=schedule' },
       { label: '팀 구성', href: '/?page=teams' },
       { label: '평가', href: '/?page=reviews', active: true },
     ],

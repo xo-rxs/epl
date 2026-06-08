@@ -1,0 +1,321 @@
+/*
+  SchedulePage 스타일
+  내가 참여한 경기를 보여주는 월 캘린더 일정 페이지
+*/
+
+.schedule-page {
+  margin-bottom: var(--spacing-8);
+}
+
+/* 페이지 헤더 */
+.schedule-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-6);
+}
+
+.schedule-header__title {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-2);
+}
+
+.schedule-header__subtitle {
+  color: var(--color-gray-600);
+}
+
+.schedule-header__count {
+  display: inline-block;
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+/* 월 이동 툴바 */
+.schedule-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.schedule-toolbar__month {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  min-width: 140px;
+  text-align: center;
+}
+
+.schedule-nav-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-gray-300);
+  background-color: var(--color-white);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-2xl);
+  line-height: 1;
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.schedule-nav-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.schedule-today-btn {
+  margin-left: auto;
+  padding: var(--spacing-2) var(--spacing-4);
+  border: 1px solid var(--color-gray-300);
+  background-color: var(--color-white);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.schedule-today-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* 캘린더 */
+.schedule-calendar {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.schedule-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+}
+
+.schedule-weekday {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-600);
+  padding: var(--spacing-2) 0;
+}
+
+.schedule-weekday.is-sunday {
+  color: var(--color-error);
+}
+
+.schedule-weekday.is-saturday {
+  color: var(--color-info);
+}
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--spacing-2);
+}
+
+.schedule-cell {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: var(--spacing-2);
+  border: 1px solid transparent;
+  background-color: var(--color-gray-50);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-800);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.schedule-cell.is-empty {
+  background-color: transparent;
+  cursor: default;
+}
+
+.schedule-cell:not(.is-empty):hover {
+  border-color: var(--color-primary);
+}
+
+.schedule-cell.is-sunday .schedule-cell__day {
+  color: var(--color-error);
+}
+
+.schedule-cell.is-saturday .schedule-cell__day {
+  color: var(--color-info);
+}
+
+.schedule-cell.is-today {
+  background-color: var(--color-primary-light);
+  font-weight: var(--font-weight-bold);
+}
+
+.schedule-cell.is-selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary) inset;
+}
+
+.schedule-cell.has-match {
+  background-color: var(--color-white);
+  border-color: var(--color-gray-300);
+}
+
+.schedule-cell__day {
+  font-weight: var(--font-weight-medium);
+}
+
+.schedule-cell__badge {
+  position: absolute;
+  right: var(--spacing-1);
+  bottom: var(--spacing-1);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+/* 선택 날짜 상세 */
+.schedule-detail {
+  margin-top: var(--spacing-6);
+}
+
+.schedule-detail__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-4);
+}
+
+.schedule-detail__empty {
+  padding: var(--spacing-6);
+  background-color: var(--color-gray-50);
+  border-radius: var(--radius-lg);
+  color: var(--color-gray-600);
+  text-align: center;
+}
+
+.schedule-match-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.schedule-match-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-base);
+  text-decoration: none;
+  color: inherit;
+  transition: all var(--transition-base);
+}
+
+.schedule-match-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.schedule-match-card__time {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-dark);
+  min-width: 56px;
+}
+
+.schedule-match-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.schedule-match-card__title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-1);
+}
+
+.schedule-match-card__meta {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-600);
+}
+
+.schedule-match-card__status {
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-white);
+  white-space: nowrap;
+}
+
+.schedule-match-card__status.is-recruiting {
+  background-color: var(--color-info);
+}
+
+.schedule-match-card__status.is-ready {
+  background-color: var(--color-success);
+}
+
+/* 비로그인 안내 */
+.schedule-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-16) var(--spacing-6);
+}
+
+.schedule-empty__icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-4);
+}
+
+.schedule-empty__title {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-2);
+}
+
+.schedule-empty__desc {
+  color: var(--color-gray-600);
+  margin-bottom: var(--spacing-6);
+}
+
+/* 모바일 대응 */
+@media (max-width: 640px) {
+  .schedule-cell {
+    padding: var(--spacing-1);
+    font-size: var(--font-size-xs);
+  }
+
+  .schedule-toolbar__month {
+    min-width: 110px;
+    font-size: var(--font-size-lg);
+  }
+
+  .schedule-match-card {
+    flex-wrap: wrap;
+  }
+}
