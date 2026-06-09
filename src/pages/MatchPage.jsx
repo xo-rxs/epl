@@ -89,7 +89,7 @@ function MatchPage() {
   const handleCreateMatch = async (formData) => {
     setLoading(true);
     try {
-      const newMatch = createMatch({
+      createMatch({
         title: formData.title,
         location: formData.location,
         datetime: formData.datetime,

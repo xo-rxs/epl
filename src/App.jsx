@@ -8,6 +8,33 @@ import ReviewPage from './pages/ReviewPage';
 import AuthPage from './pages/AuthPage';
 import SchedulePage from './pages/SchedulePage';
 
+// URL의 ?page= 값과 실제로 보여줄 페이지 컴포넌트를 짝지어 둔 표.
+// 새 페이지를 추가할 때는 여기에 한 줄만 넣으면 됩니다.
+const PAGE_COMPONENTS = {
+  match: MatchPage,
+  teams: TeamPage,
+  reviews: ReviewPage,
+  schedule: SchedulePage,
+  auth: AuthPage,
+};
+
+/**
+ * 현재 주소(URL)를 보고 어떤 페이지를 보여줄지 이름으로 돌려준다.
+ * 예) /?page=teams  -> 'teams'
+ *     /?matchId=123 -> 'match' (경기 상세)
+ *     그 외          -> 'home'
+ */
+const getPageFromUrl = () => {
+  const params = new URLSearchParams(window.location.search);
+  const page = params.get('page');
+
+  // matchId가 있으면 특정 경기 상세 화면(match)으로 본다.
+  if (params.has('matchId')) return 'match';
+
+  // page 값이 표에 있는 정식 페이지면 그대로, 아니면 홈으로.
+  return PAGE_COMPONENTS[page] ? page : 'home';
+};
+
 /**
  * App 메인 컴포넌트
  * EPL 홈페이지 및 라우팅 관리
@@ -17,18 +44,7 @@ function App() {
 
   // URL 기반 페이지 라우팅 및 브라우저 뒤로가기 동기화
   useEffect(() => {
-    const syncPageFromUrl = () => {
-      const params = new URLSearchParams(window.location.search);
-      const page = params.get('page');
-
-      if (page === 'teams') { setCurrentPage('teams'); return; }
-      if (page === 'reviews') { setCurrentPage('reviews'); return; }
-      if (page === 'schedule') { setCurrentPage('schedule'); return; }
-      if (page === 'auth') { setCurrentPage('auth'); return; }
-      if (params.has('matchId') || page === 'match') { setCurrentPage('match'); return; }
-
-      setCurrentPage('home');
-    };
+    const syncPageFromUrl = () => setCurrentPage(getPageFromUrl());
 
     syncPageFromUrl();
     window.addEventListener('popstate', syncPageFromUrl);
@@ -191,11 +207,10 @@ function App() {
     );
   };
 
-  if (currentPage === 'teams') return <TeamPage />;
-  if (currentPage === 'match') return <MatchPage />;
-  if (currentPage === 'reviews') return <ReviewPage />;
-  if (currentPage === 'schedule') return <SchedulePage />;
-  if (currentPage === 'auth') return <AuthPage />;
+  // 현재 페이지에 해당하는 컴포넌트를 표에서 찾아 보여준다.
+  // 표에 없으면(=home) 아래의 홈 화면을 그린다.
+  const PageComponent = PAGE_COMPONENTS[currentPage];
+  if (PageComponent) return <PageComponent />;
 
   return renderHome();
 }
