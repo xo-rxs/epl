@@ -1,5 +1,35 @@
 # Worklog
 
+## 2026-06-09
+
+### 작업 내용
+- 쓸데없는(미사용) 코드 정리 + 초보자도 읽기 쉽게 리팩토링
+- 어디서도 import되지 않는 죽은 util 파일 3개 삭제
+  - src/utils/constants.js (POSITIONS/YEARS 등 어떤 페이지도 사용 안 함, 각 페이지가 자체 상수 보유)
+  - src/utils/validators.js (MatchForm이 자체 validateForm을 가지고 있어 미사용)
+  - src/utils/index.js (위 파일들을 re-export하던 배럴, 실제 import는 전부 직접 경로라 미사용)
+- lint가 잡던 죽은 코드 제거
+  - src/hooks/useLocalStorage.js: 사용하지 않는 useEffect import 삭제
+  - src/pages/MatchPage.jsx: 사용하지 않는 newMatch 변수 제거
+- App.jsx 라우팅 단순화(초보자 가독성)
+  - 반복되던 `if (page === ...)` 분기를 PAGE_COMPONENTS 표 + getPageFromUrl() 한 곳으로 통합
+  - 하단 렌더 분기도 같은 표를 재사용하도록 정리, 한글 주석 추가
+
+### 주요 변경 파일
+- src/utils/constants.js (삭제)
+- src/utils/validators.js (삭제)
+- src/utils/index.js (삭제)
+- src/hooks/useLocalStorage.js
+- src/pages/MatchPage.jsx
+- src/App.jsx
+
+### 검증 결과
+- npm run lint: 기존 5개 → 3개 (제거한 2개는 위 죽은 코드, 남은 3개는 기존부터 있던 MatchPage/ReviewPage의 set-state-in-effect 경고로 이번 작업과 무관)
+- npm run build: 성공
+
+### 메모
+- 남은 set-state-in-effect 경고는 이펙트 구조 개선이 필요한 별도 과제(죽은 코드 아님)로 남겨둠
+
 ## 2026-06-08
 
 ### 작업 내용
