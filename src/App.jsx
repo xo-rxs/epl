@@ -194,7 +194,7 @@ function App() {
         {/* CTA 섹션 */}
         <section className="home-cta">
           <h2 className="home-cta__title">지금 바로 시작해보세요</h2>
-          <p className="home-cta__desc">설치 없이, 로그인 없이. 링크 하나로 모든 팀원이 참여합니다.</p>
+          <p className="home-cta__desc">설치 없이. 링크 하나로 모든 팀원이 참여합니다.</p>
           <Button
             variant="primary"
             size="lg"

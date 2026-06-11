@@ -26,6 +26,8 @@ const captureElement = async (element, options = {}) => {
     scale: 2,
     backgroundColor: '#0b5d2a',
     useCORS: true,
+    allowTaint: true,
+    logging: false,
     ...options,
   });
 };
