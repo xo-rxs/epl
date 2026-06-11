@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import Button from './Button';
 import { buildBalancedTeams } from '../utils/snakeDraft';
+import { exportToCSV, generateFilename } from '../utils/csvExport';
 import '../styles/TeamBuilder.css';
 
 const POSITION_COLOR = {
@@ -70,6 +71,23 @@ function TeamBuilder({ participants = [], onConfirmTeams, confirmedAt }) {
     });
   }, [normalizedParticipants, ageWeight, iterations, refreshSeed]);
 
+  const handleExportTeamsCSV = () => {
+    if (!result) return;
+    const toRows = (players, teamLabel) =>
+      players.map((p, i) => ({
+        '팀': teamLabel,
+        '순서': i + 1,
+        '이름': p.name || p.nickname,
+        '나이': p.age || '',
+        '포지션': p.position || '',
+        '실력점수': p.skillScore || '',
+      }));
+    exportToCSV(
+      [...toRows(result.teamA, 'A (블루)'), ...toRows(result.teamB, 'B (레드)')],
+      generateFilename('팀배정')
+    );
+  };
+
   if (participants.length < 2) {
     return (
       <div className="tb-empty">
@@ -95,6 +113,11 @@ function TeamBuilder({ participants = [], onConfirmTeams, confirmedAt }) {
             {result && onConfirmTeams && (
               <Button variant="secondary" onClick={() => onConfirmTeams(result)}>
                 ✅ 팀 구성 확정
+              </Button>
+            )}
+            {result && (
+              <Button variant="secondary" onClick={handleExportTeamsCSV}>
+                📥 팀 CSV 내보내기
               </Button>
             )}
           </div>
