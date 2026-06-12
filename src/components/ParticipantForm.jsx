@@ -24,6 +24,7 @@ const SKILL_TIER_LABEL = {
  * @param {object} currentUser - 현재 로그인 사용자
  * @param {number} currentCount - 현재 참여자 수
  * @param {number} maxCount - 최대 참가자 수
+ * @param {boolean} isClosed - 모집 마감 여부 (정원 충족 또는 수동 마감)
  * @param {boolean} loading - 로딩 상태
  */
 function ParticipantForm({
@@ -31,9 +32,10 @@ function ParticipantForm({
   currentUser,
   currentCount = 0,
   maxCount = 20,
+  isClosed = false,
   loading = false,
 }) {
-  const isFull = currentCount >= maxCount;
+  const isFull = isClosed || currentCount >= maxCount;
   const skillScore = SKILL_TIER_SCORE[currentUser?.skillTier] || 3;
   const skillTierLabel = SKILL_TIER_LABEL[currentUser?.skillTier] || '미입력';
 
@@ -47,7 +49,7 @@ function ParticipantForm({
     }
 
     if (isFull) {
-      alert('참가 인원이 가득 찼습니다.');
+      alert('모집이 마감된 경기입니다.');
       return;
     }
 
@@ -78,7 +80,7 @@ function ParticipantForm({
               onClick={handleSubmit}
               disabled={isFull}
             >
-              {isFull ? '신청 불가' : '신청하기'}
+              {isFull ? '마감' : '신청하기'}
             </Button>
           </div>
         </div>
@@ -151,7 +153,7 @@ function ParticipantForm({
           color: 'var(--color-error)',
           fontSize: 'var(--font-size-sm)',
         }}>
-          ⚠️ 참가 인원이 모두 찼습니다.
+          ⚠️ 모집이 마감되었습니다. {currentCount >= maxCount ? '참가 인원이 모두 찼습니다.' : '주최자가 모집을 마감했습니다.'}
         </div>
       )}
     </Card>
