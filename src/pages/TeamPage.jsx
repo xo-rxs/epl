@@ -50,6 +50,7 @@ function TeamPage() {
       { label: '일정', href: '/?page=schedule' },
       { label: '팀 구성', href: '/?page=teams', active: true },
       { label: '평가', href: '/?page=reviews' },
+      { label: '마이페이지', href: '/?page=auth' },
     ],
   };
 
