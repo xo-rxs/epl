@@ -18,15 +18,41 @@
 }
 
 .rv-toast {
-  margin-bottom: var(--spacing-4);
+  position: fixed;
+  bottom: var(--spacing-6);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  max-width: calc(100vw - var(--spacing-8));
   padding: var(--spacing-3) var(--spacing-5);
-  background: rgba(46, 204, 113, 0.1);
-  border: 1px solid rgba(46, 204, 113, 0.3);
-  border-radius: var(--radius-base);
-  color: var(--color-primary-dark);
+  background: var(--color-gray-900);
+  border: 1px solid rgba(46, 204, 113, 0.5);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  color: var(--color-white);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  animation: rv-fade-in 0.2s ease;
+  animation: rv-toast-up 0.25s ease;
+}
+
+.rv-toast__link {
+  flex-shrink: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  color: #2ecc71;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+@keyframes rv-toast-up {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
 }
 
 @keyframes rv-fade-in {

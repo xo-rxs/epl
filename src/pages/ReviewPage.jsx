@@ -1,9 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Layout, Container, Button } from '../components';
-import { useMatchData } from '../hooks';
+import { useAuthData, useMatchData } from '../hooks';
+import { addReviewPoints, REVIEW_REWARD_POINTS } from '../utils/reviewPoints';
 import '../styles/ReviewPage.css';
 
 const getStatus = (p) => p.status || 'approved';
+
+// 평가자 식별용 익명 키 생성 (원본 사용자 ID를 평가 데이터에 남기지 않기 위한 단방향 해시)
+const toAnonymousKey = (userId) => {
+  let hash = 5381;
+  for (let i = 0; i < userId.length; i += 1) {
+    hash = (hash * 33) ^ userId.charCodeAt(i);
+  }
+  return `anon_${(hash >>> 0).toString(16)}`;
+};
 
 const REVIEW_TAGS = {
   positive: [
@@ -138,25 +148,38 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
 
 function ReviewPage() {
   const { matches, updateMatch } = useMatchData();
+  const { currentUser } = useAuthData();
   const [selectedMatchId, setSelectedMatchId] = useState(matches[0]?.id || '');
   const [entries, setEntries] = useState({});
   const [savedMsg, setSavedMsg] = useState('');
   const cardRefs = useRef({});
+
+  // 평가 데이터에는 익명 키만 저장된다 (누가 평가했는지 노출되지 않음)
+  const reviewerKey = currentUser ? toAnonymousKey(currentUser.id) : null;
 
   const selectedMatch = useMemo(
     () => matches.find((m) => m.id === selectedMatchId) || null,
     [matches, selectedMatchId]
   );
 
+  // 내가 이전에 저장한 평가 (익명 키 기준)
+  const myReview = useMemo(() => {
+    if (!selectedMatch || !reviewerKey) return null;
+    return selectedMatch.reviewsByUser?.[reviewerKey] || null;
+  }, [selectedMatch, reviewerKey]);
+
+  // 승인된 참여자 중 본인을 제외한 평가 대상
   const approvedParticipants = useMemo(() => {
     if (!selectedMatch) return [];
-    return (selectedMatch.participants || []).filter((p) => getStatus(p) === 'approved');
-  }, [selectedMatch]);
+    return (selectedMatch.participants || []).filter(
+      (p) => getStatus(p) === 'approved' && p.userId !== currentUser?.id
+    );
+  }, [selectedMatch, currentUser]);
 
   useEffect(() => {
     if (!selectedMatch) { setEntries({}); return; }
-    setEntries(buildInitialEntries(approvedParticipants, selectedMatch.reviews?.entries || []));
-  }, [approvedParticipants, selectedMatch]);
+    setEntries(buildInitialEntries(approvedParticipants, myReview?.entries || []));
+  }, [approvedParticipants, selectedMatch, myReview]);
 
   const ratedCount = useMemo(
     () => approvedParticipants.filter((p) => entries[p.id]?.rating > 0).length,
@@ -196,7 +219,13 @@ function ReviewPage() {
   }, []);
 
   const handleSave = () => {
-    if (!selectedMatch) return;
+    if (!selectedMatch || !currentUser || !reviewerKey) return;
+
+    if (ratedCount === 0) {
+      alert('최소 한 명 이상 별점을 매긴 후 저장할 수 있습니다.');
+      return;
+    }
+
     const reviewEntries = approvedParticipants.map((p) => {
       const e = entries[p.id] || { rating: 0, tags: [] };
       return {
@@ -208,11 +237,24 @@ function ReviewPage() {
         tags: e.tags || [],
       };
     });
+
+    // 평가자별로 익명 키 아래에 저장 (참여자 누구나 평가 가능, 익명 보장)
+    const isFirstSave = !myReview;
     updateMatch(selectedMatch.id, {
-      reviews: { createdBy: 'host', createdAt: new Date().toISOString(), entries: reviewEntries },
+      reviewsByUser: {
+        ...(selectedMatch.reviewsByUser || {}),
+        [reviewerKey]: { createdAt: new Date().toISOString(), entries: reviewEntries },
+      },
     });
-    setSavedMsg('평가가 저장되었습니다! ✅');
-    setTimeout(() => setSavedMsg(''), 3000);
+
+    // 첫 저장 시에만 포인트 적립 (평가 참여 혜택)
+    if (isFirstSave) {
+      addReviewPoints(currentUser.id, REVIEW_REWARD_POINTS);
+      setSavedMsg(`평가가 익명으로 저장되었습니다! ✅ +${REVIEW_REWARD_POINTS}P 적립`);
+    } else {
+      setSavedMsg('평가가 익명으로 수정 저장되었습니다! ✅');
+    }
+    setTimeout(() => setSavedMsg(''), 5000);
   };
 
   const headerProps = {
@@ -225,8 +267,35 @@ function ReviewPage() {
       { label: '일정', href: '/?page=schedule' },
       { label: '팀 구성', href: '/?page=teams' },
       { label: '평가', href: '/?page=reviews', active: true },
+      { label: '마이페이지', href: '/?page=auth' },
     ],
   };
+
+  // 비로그인 상태에서는 익명 평가를 위해 로그인 안내
+  if (!currentUser) {
+    return (
+      <Layout headerProps={headerProps}>
+        <Container>
+          <div className="rv-empty">
+            <span>🔐</span>
+            <p>
+              평가는 로그인 후 참여할 수 있습니다.
+              <br />
+              평가 내용은 익명으로 저장되며, 평가 완료 시 {REVIEW_REWARD_POINTS}P가 적립됩니다.
+            </p>
+            <Button
+              variant="primary"
+              onClick={() => {
+                window.location.href = '/?page=auth';
+              }}
+            >
+              로그인하기
+            </Button>
+          </div>
+        </Container>
+      </Layout>
+    );
+  }
 
   return (
     <Layout headerProps={headerProps}>
@@ -235,11 +304,27 @@ function ReviewPage() {
         <div className="rv-page-header">
           <div>
             <h2 className="rv-page-title">경기 평가</h2>
-            <p className="rv-page-desc">별점을 클릭하면 다음 선수로 자동으로 넘어갑니다.</p>
+            <p className="rv-page-desc">
+              함께한 모든 참여자가 서로를 평가할 수 있습니다. 평가는 <strong>선택사항</strong>이며{' '}
+              <strong>익명</strong>으로 저장됩니다. 평가 완료 시 {REVIEW_REWARD_POINTS}P가 적립돼요.
+            </p>
           </div>
         </div>
 
-        {savedMsg && <div className="rv-toast">{savedMsg}</div>}
+        {savedMsg && (
+          <div className="rv-toast">
+            <span>{savedMsg}</span>
+            <button
+              type="button"
+              className="rv-toast__link"
+              onClick={() => {
+                window.location.href = '/?page=auth';
+              }}
+            >
+              마이페이지에서 확인 →
+            </button>
+          </div>
+        )}
 
         {matches.length === 0 ? (
           <div className="rv-empty">
@@ -283,9 +368,9 @@ function ReviewPage() {
                       style={{ width: `${(ratedCount / approvedParticipants.length) * 100}%` }}
                     />
                   </div>
-                  {selectedMatch.reviews?.createdAt && (
+                  {myReview?.createdAt && (
                     <span className="rv-progress__saved">
-                      마지막 저장: {new Date(selectedMatch.reviews.createdAt).toLocaleString('ko-KR')}
+                      내 평가 마지막 저장: {new Date(myReview.createdAt).toLocaleString('ko-KR')}
                     </span>
                   )}
                 </div>
@@ -321,7 +406,7 @@ function ReviewPage() {
             {selectedMatch && approvedParticipants.length === 0 && (
               <div className="rv-empty">
                 <span>👥</span>
-                <p>승인된 참여자가 없습니다.</p>
+                <p>평가할 수 있는 참여자가 없습니다. (본인은 평가 대상에서 제외됩니다)</p>
               </div>
             )}
           </div>
