@@ -170,6 +170,47 @@ function useAuthData() {
     notifyAuthChange();
   }, []);
 
+  /**
+   * 프로필 수정 (선호 포지션, 스킬 티어)
+   */
+  const updateProfile = useCallback((updates) => {
+    const savedCurrentUser = readJson(CURRENT_USER_KEY, null);
+
+    if (!savedCurrentUser) {
+      return { ok: false, message: '로그인 후 이용할 수 있습니다.' };
+    }
+
+    const nextProfile = {};
+
+    if (updates.preferredPosition !== undefined) {
+      if (!POSITION_OPTIONS.includes(updates.preferredPosition)) {
+        return { ok: false, message: '선호 포지션을 선택해주세요.' };
+      }
+      nextProfile.preferredPosition = updates.preferredPosition;
+    }
+
+    if (updates.skillTier !== undefined) {
+      if (!SKILL_TIER_OPTIONS.includes(updates.skillTier)) {
+        return { ok: false, message: '스킬 티어를 선택해주세요.' };
+      }
+      nextProfile.skillTier = updates.skillTier;
+    }
+
+    const savedUsers = readJson(USERS_KEY, []);
+    const nextUsers = savedUsers.map((user) =>
+      user.id === savedCurrentUser.id ? { ...user, ...nextProfile } : user
+    );
+    const nextCurrentUser = { ...savedCurrentUser, ...nextProfile };
+
+    writeJson(USERS_KEY, nextUsers);
+    writeJson(CURRENT_USER_KEY, nextCurrentUser);
+    setUsers(nextUsers);
+    setCurrentUser(nextCurrentUser);
+    notifyAuthChange();
+
+    return { ok: true, user: nextCurrentUser };
+  }, []);
+
   return {
     users,
     currentUser,
@@ -177,6 +218,7 @@ function useAuthData() {
     signUp,
     login,
     logout,
+    updateProfile,
   };
 }
 
