@@ -36,22 +36,53 @@ const REVIEW_TAGS = {
 const buildInitialEntries = (participants, existingEntries = []) => {
   const map = {};
   existingEntries.forEach((e) => {
-    map[e.participantId] = { rating: e.rating, tags: e.tags || [], touched: true };
+    map[e.participantId] = {
+      rating: e.rating || 0,
+      skillRating: e.skillRating || 0,
+      tags: e.tags || [],
+      touched: true,
+    };
   });
   participants.forEach((p) => {
-    if (!map[p.id]) map[p.id] = { rating: 0, tags: [], touched: false };
+    if (!map[p.id]) map[p.id] = { rating: 0, skillRating: 0, tags: [], touched: false };
   });
   return map;
 };
+
+// 실력·매너 모두 별점을 매겼는지 여부
+const isFullyRated = (entry) => entry?.rating > 0 && entry?.skillRating > 0;
+
+/* 별점 한 줄 (실력/매너 공용) */
+function StarRow({ label, value, onSelect }) {
+  return (
+    <div className="rv-rate-row">
+      <span className="rv-rate-label">{label}</span>
+      <div className="rv-stars" role="radiogroup" aria-label={label}>
+        {[1, 2, 3, 4, 5].map((score) => (
+          <button
+            key={score}
+            type="button"
+            className={`rv-star ${value >= score ? 'is-active' : ''}`}
+            aria-pressed={value === score}
+            onClick={() => onSelect(score)}
+          >
+            ★
+          </button>
+        ))}
+        {value > 0 && <span className="rv-star-label">{value}점</span>}
+      </div>
+    </div>
+  );
+}
 
 /* 개별 선수 평가 카드 */
 function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
   const [tagsOpen, setTagsOpen] = useState(false);
   const touched = entry.touched;
-  const rated = entry.rating > 0;
+  const rated = isFullyRated(entry);
 
-  const handleRate = (score) => {
-    onRate(participant.id, score);
+  const handleRate = (field, score) => {
+    onRate(participant.id, field, score);
     if (!tagsOpen) setTagsOpen(true);
   };
 
@@ -71,30 +102,25 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
         </div>
         {rated && (
           <div className="rv-card__done-badge">
-            {'★'.repeat(entry.rating)}
-            {'☆'.repeat(5 - entry.rating)}
+            실력 ★{entry.skillRating} · 매너 ★{entry.rating}
           </div>
         )}
       </div>
 
-      {/* 별점 */}
-      <div className="rv-stars" role="radiogroup" aria-label="평점">
-        {[1, 2, 3, 4, 5].map((score) => (
-          <button
-            key={score}
-            type="button"
-            className={`rv-star ${entry.rating >= score ? 'is-active' : ''}`}
-            aria-pressed={entry.rating === score}
-            onClick={() => handleRate(score)}
-          >
-            ★
-          </button>
-        ))}
-        {rated && <span className="rv-star-label">{entry.rating}점</span>}
-      </div>
+      {/* 실력 / 매너 별점 */}
+      <StarRow
+        label="실력"
+        value={entry.skillRating}
+        onSelect={(score) => handleRate('skillRating', score)}
+      />
+      <StarRow
+        label="매너"
+        value={entry.rating}
+        onSelect={(score) => handleRate('rating', score)}
+      />
 
       {/* 태그 (별점 선택 후 펼쳐짐) */}
-      {rated && (
+      {(entry.rating > 0 || entry.skillRating > 0) && (
         <div className="rv-tags-section">
           <button
             type="button"
@@ -182,21 +208,24 @@ function ReviewPage() {
   }, [approvedParticipants, selectedMatch, myReview]);
 
   const ratedCount = useMemo(
-    () => approvedParticipants.filter((p) => entries[p.id]?.rating > 0).length,
+    () => approvedParticipants.filter((p) => isFullyRated(entries[p.id])).length,
     [approvedParticipants, entries]
   );
 
-  /* 별점 선택 → 다음 미평가 선수로 자동 스크롤 */
-  const handleRate = useCallback((participantId, score) => {
+  /* 별점 선택 → 실력·매너 모두 매기면 다음 미평가 선수로 자동 스크롤 */
+  const handleRate = useCallback((participantId, field, score) => {
     setEntries((prev) => ({
       ...prev,
-      [participantId]: { ...prev[participantId], rating: score, touched: true },
+      [participantId]: { ...prev[participantId], [field]: score, touched: true },
     }));
 
-    // 다음 미평가 선수 찾기
+    // 이번 선택으로 실력·매너가 모두 채워졌을 때만 다음 선수로 이동
+    const updatedEntry = { ...entries[participantId], [field]: score };
+    if (!isFullyRated(updatedEntry)) return;
+
     const idx = approvedParticipants.findIndex((p) => p.id === participantId);
     const nextUnrated = approvedParticipants.slice(idx + 1).find(
-      (p) => !(entries[p.id]?.rating > 0)
+      (p) => !isFullyRated(entries[p.id])
     );
     if (nextUnrated) {
       setTimeout(() => {
@@ -221,19 +250,23 @@ function ReviewPage() {
   const handleSave = () => {
     if (!selectedMatch || !currentUser || !reviewerKey) return;
 
-    if (ratedCount === 0) {
+    const hasAnyRating = approvedParticipants.some(
+      (p) => entries[p.id]?.rating > 0 || entries[p.id]?.skillRating > 0
+    );
+    if (!hasAnyRating) {
       alert('최소 한 명 이상 별점을 매긴 후 저장할 수 있습니다.');
       return;
     }
 
     const reviewEntries = approvedParticipants.map((p) => {
-      const e = entries[p.id] || { rating: 0, tags: [] };
+      const e = entries[p.id] || { rating: 0, skillRating: 0, tags: [] };
       return {
         participantId: p.id,
         nickname: p.name || p.nickname,
         age: p.age,
         position: p.position,
         rating: Number(e.rating) || 0,
+        skillRating: Number(e.skillRating) || 0,
         tags: e.tags || [],
       };
     });
@@ -305,8 +338,10 @@ function ReviewPage() {
           <div>
             <h2 className="rv-page-title">경기 평가</h2>
             <p className="rv-page-desc">
-              함께한 모든 참여자가 서로를 평가할 수 있습니다. 평가는 <strong>선택사항</strong>이며{' '}
-              <strong>익명</strong>으로 저장됩니다. 평가 완료 시 {REVIEW_REWARD_POINTS}P가 적립돼요.
+              선수마다 <strong>실력</strong>과 <strong>매너</strong>를 따로 평가합니다. 받은 실력 평가는
+              자기평가와 합산되어 팀 배정에 쓰이는 <strong>보정 실력 점수</strong>에 반영돼요.
+              평가는 <strong>선택사항</strong>이며 <strong>익명</strong>으로 저장되고, 완료 시{' '}
+              {REVIEW_REWARD_POINTS}P가 적립됩니다.
             </p>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Layout, Container, Input, Button } from '../components';
 import { useAuthData, useMatchData } from '../hooks';
 import { getReviewPoints } from '../utils/reviewPoints';
+import { getObjectiveSkillScore, getPeerSkillStats } from '../utils/skillScore';
 import '../styles/AuthPage.css';
 
 const INITIAL_FORM = {
@@ -143,11 +144,12 @@ function AuthPage() {
   const selectedTier = SKILL_TIERS.find((t) => t.value === formData.skillTier);
   const currentUserTier = SKILL_TIERS.find((t) => t.value === currentUser?.skillTier);
 
-  // 내가 받은 익명 평가 요약 (평균 별점, 받은 평가 수, 자주 받은 태그)
+  // 내가 받은 익명 평가 요약 (실력·매너 평균, 받은 평가 수, 자주 받은 태그)
   const reviewSummary = useMemo(() => {
     if (!currentUser) return null;
 
-    const ratings = [];
+    const mannerRatings = [];
+    const skillRatings = [];
     const tagCounts = {};
 
     matches.forEach((match) => {
@@ -160,8 +162,11 @@ function AuthPage() {
 
       Object.values(match.reviewsByUser || {}).forEach((review) => {
         (review.entries || []).forEach((entry) => {
-          if (!myParticipantIds.has(entry.participantId) || !(entry.rating > 0)) return;
-          ratings.push(entry.rating);
+          if (!myParticipantIds.has(entry.participantId)) return;
+          if (!(entry.rating > 0) && !(entry.skillRating > 0)) return;
+
+          if (entry.rating > 0) mannerRatings.push(entry.rating);
+          if (entry.skillRating > 0) skillRatings.push(entry.skillRating);
           (entry.tags || []).forEach((tag) => {
             tagCounts[tag] = (tagCounts[tag] || 0) + 1;
           });
@@ -169,11 +174,15 @@ function AuthPage() {
       });
     });
 
+    const average = (list) =>
+      list.length ? list.reduce((sum, rating) => sum + rating, 0) / list.length : 0;
+
     return {
-      count: ratings.length,
-      avgRating: ratings.length
-        ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
-        : 0,
+      count: Math.max(mannerRatings.length, skillRatings.length),
+      avgManner: average(mannerRatings),
+      mannerCount: mannerRatings.length,
+      avgSkill: average(skillRatings),
+      skillCount: skillRatings.length,
       topTags: Object.entries(tagCounts)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 3),
@@ -181,6 +190,17 @@ function AuthPage() {
   }, [matches, currentUser]);
 
   const reviewPoints = currentUser ? getReviewPoints(currentUser.id) : 0;
+
+  // 보정 실력 점수 (자기평가 + 동료 실력 평가 합산) — 팀 배정에 사용되는 값
+  const selfSkillScore = currentUserTier
+    ? 5 - SKILL_TIERS.findIndex((t) => t.value === currentUserTier.value)
+    : 3;
+  const peerSkillStats = currentUser
+    ? getPeerSkillStats(matches, currentUser.id)
+    : { count: 0, avg: 0 };
+  const objectiveSkillScore = currentUser
+    ? getObjectiveSkillScore(selfSkillScore, matches, currentUser.id)
+    : selfSkillScore;
 
   const handleStartEditProfile = () => {
     setEditProfile({
@@ -329,13 +349,31 @@ function AuthPage() {
                   </div>
                   <div className="auth-review-stat">
                     <span className="auth-review-stat__value">
-                      {reviewSummary?.count > 0 ? `★ ${reviewSummary.avgRating.toFixed(1)}` : '-'}
+                      {reviewSummary?.skillCount > 0 ? `★ ${reviewSummary.avgSkill.toFixed(1)}` : '-'}
                     </span>
-                    <span className="auth-review-stat__label">평균 별점</span>
+                    <span className="auth-review-stat__label">실력 평균</span>
+                  </div>
+                  <div className="auth-review-stat">
+                    <span className="auth-review-stat__value">
+                      {reviewSummary?.mannerCount > 0 ? `★ ${reviewSummary.avgManner.toFixed(1)}` : '-'}
+                    </span>
+                    <span className="auth-review-stat__label">매너 평균</span>
                   </div>
                   <div className="auth-review-stat">
                     <span className="auth-review-stat__value">{reviewSummary?.count || 0}</span>
                     <span className="auth-review-stat__label">받은 평가</span>
+                  </div>
+                </div>
+
+                {/* 보정 실력 점수 (팀 배정에 사용) */}
+                <div className="auth-objective-skill">
+                  <div>
+                    <strong>보정 실력 점수 {objectiveSkillScore}</strong>
+                    <span>
+                      {peerSkillStats.count > 0
+                        ? `자기평가 ${selfSkillScore} + 동료 실력 평가 ${peerSkillStats.count}회 합산 · 팀 배정에 사용됩니다.`
+                        : `아직 동료 실력 평가가 없어 자기평가(${selfSkillScore})가 그대로 사용됩니다.`}
+                    </span>
                   </div>
                 </div>
                 {reviewSummary?.topTags.length > 0 && (

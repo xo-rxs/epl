@@ -244,6 +244,24 @@
 }
 
 /* ── 별점 ── */
+.rv-rate-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.rv-rate-row + .rv-rate-row {
+  margin-top: var(--spacing-2);
+}
+
+.rv-rate-label {
+  flex-shrink: 0;
+  width: 32px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-600);
+}
+
 .rv-stars {
   display: flex;
   align-items: center;

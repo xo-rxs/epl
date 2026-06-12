@@ -1,5 +1,7 @@
 import Button from './Button';
 import Card from './Card';
+import { useMatchData } from '../hooks';
+import { getObjectiveSkillScore, getPeerSkillStats } from '../utils/skillScore';
 
 const SKILL_TIER_SCORE = {
   THE_GOAT: 5,
@@ -35,8 +37,16 @@ function ParticipantForm({
   isClosed = false,
   loading = false,
 }) {
+  const { matches } = useMatchData();
   const isFull = isClosed || currentCount >= maxCount;
-  const skillScore = SKILL_TIER_SCORE[currentUser?.skillTier] || 3;
+  const selfSkillScore = SKILL_TIER_SCORE[currentUser?.skillTier] || 3;
+  // 동료 실력 평가가 있으면 자기평가와 합산한 보정 점수를 사용 (팀 배정 객관화)
+  const peerStats = currentUser
+    ? getPeerSkillStats(matches, currentUser.id)
+    : { count: 0, avg: 0 };
+  const skillScore = currentUser
+    ? getObjectiveSkillScore(selfSkillScore, matches, currentUser.id)
+    : selfSkillScore;
   const skillTierLabel = SKILL_TIER_LABEL[currentUser?.skillTier] || '미입력';
 
   const handleSubmit = (e) => {
@@ -113,10 +123,13 @@ function ParticipantForm({
               </span>
               <span className="participant-status participant-status-approved">
                 실력 {skillScore}
+                {peerStats.count > 0 && ' (보정)'}
               </span>
             </div>
             <p style={{ color: 'var(--color-gray-600)', fontSize: 'var(--font-size-sm)' }}>
-              마이페이지 정보로 참여 신청합니다. 정보 수정은 마이페이지에서 진행해주세요.
+              {peerStats.count > 0
+                ? `동료 실력 평가 ${peerStats.count}회가 반영된 보정 점수로 팀 배정에 참여합니다.`
+                : '마이페이지 정보로 참여 신청합니다. 경기 후 동료 평가가 쌓이면 실력 점수가 보정됩니다.'}
             </p>
           </div>
         ) : (
