@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Layout, Container, Input, Button } from '../components';
-import { useAuthData } from '../hooks';
+import { useAuthData, useMatchData } from '../hooks';
+import { getReviewPoints } from '../utils/reviewPoints';
 import '../styles/AuthPage.css';
 
 const INITIAL_FORM = {
@@ -128,16 +129,79 @@ const StepIndicator = ({ current, total }) => (
  * 2단계 회원가입 + 로그인 화면
  */
 function AuthPage() {
-  const { currentUser, login, signUp, logout } = useAuthData();
+  const { currentUser, login, signUp, logout, updateProfile } = useAuthData();
+  const { matches } = useMatchData();
   const [mode, setMode] = useState('login');
   const [step, setStep] = useState(0); // 회원가입 단계 (0: 기본정보, 1: 스킬티어)
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [message, setMessage] = useState({ text: '', isError: false });
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editProfile, setEditProfile] = useState({ preferredPosition: 'MF', skillTier: 'HIKER' });
   const mountainRef = useRef(null);
 
   const isLogin = mode === 'login';
   const selectedTier = SKILL_TIERS.find((t) => t.value === formData.skillTier);
   const currentUserTier = SKILL_TIERS.find((t) => t.value === currentUser?.skillTier);
+
+  // 내가 받은 익명 평가 요약 (평균 별점, 받은 평가 수, 자주 받은 태그)
+  const reviewSummary = useMemo(() => {
+    if (!currentUser) return null;
+
+    const ratings = [];
+    const tagCounts = {};
+
+    matches.forEach((match) => {
+      const myParticipantIds = new Set(
+        (match.participants || [])
+          .filter((p) => p.userId === currentUser.id)
+          .map((p) => p.id)
+      );
+      if (myParticipantIds.size === 0) return;
+
+      Object.values(match.reviewsByUser || {}).forEach((review) => {
+        (review.entries || []).forEach((entry) => {
+          if (!myParticipantIds.has(entry.participantId) || !(entry.rating > 0)) return;
+          ratings.push(entry.rating);
+          (entry.tags || []).forEach((tag) => {
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+          });
+        });
+      });
+    });
+
+    return {
+      count: ratings.length,
+      avgRating: ratings.length
+        ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
+        : 0,
+      topTags: Object.entries(tagCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3),
+    };
+  }, [matches, currentUser]);
+
+  const reviewPoints = currentUser ? getReviewPoints(currentUser.id) : 0;
+
+  const handleStartEditProfile = () => {
+    setEditProfile({
+      preferredPosition: currentUser?.preferredPosition || 'MF',
+      skillTier: currentUser?.skillTier || 'HIKER',
+    });
+    setIsEditingProfile(true);
+    setMessage({ text: '', isError: false });
+  };
+
+  const handleSaveProfile = () => {
+    const result = updateProfile(editProfile);
+
+    if (!result.ok) {
+      setMessage({ text: result.message, isError: true });
+      return;
+    }
+
+    setIsEditingProfile(false);
+    setMessage({ text: '프로필이 수정되었습니다! ✅', isError: false });
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -222,8 +286,10 @@ function AuthPage() {
     navItems: [
       { label: '홈', href: '/' },
       { label: '경기', href: '/?page=match' },
+      { label: '일정', href: '/?page=schedule' },
       { label: '팀 구성', href: '/?page=teams' },
       { label: '평가', href: '/?page=reviews' },
+      { label: '마이페이지', href: '/?page=auth', active: true },
     ],
   };
 
@@ -254,16 +320,96 @@ function AuthPage() {
                     </div>
                   ))}
                 </dl>
-                {currentUserTier && (
-                  <>
-                    <SkillMountain selectedValue={currentUser.skillTier} />
-                    <div className="auth-tier-card" style={{ borderColor: currentUserTier.color + '60', background: currentUserTier.color + '0e' }}>
-                      <strong style={{ color: currentUserTier.color }}>{currentUserTier.label}</strong>
-                      <span>{currentUserTier.description}</span>
-                    </div>
-                  </>
+
+                {/* 받은 평가 요약 + 평가 포인트 */}
+                <div className="auth-review-summary">
+                  <div className="auth-review-stat">
+                    <span className="auth-review-stat__value">{reviewPoints}P</span>
+                    <span className="auth-review-stat__label">평가 포인트</span>
+                  </div>
+                  <div className="auth-review-stat">
+                    <span className="auth-review-stat__value">
+                      {reviewSummary?.count > 0 ? `★ ${reviewSummary.avgRating.toFixed(1)}` : '-'}
+                    </span>
+                    <span className="auth-review-stat__label">평균 별점</span>
+                  </div>
+                  <div className="auth-review-stat">
+                    <span className="auth-review-stat__value">{reviewSummary?.count || 0}</span>
+                    <span className="auth-review-stat__label">받은 평가</span>
+                  </div>
+                </div>
+                {reviewSummary?.topTags.length > 0 && (
+                  <div className="auth-review-tags">
+                    {reviewSummary.topTags.map(([tag, count]) => (
+                      <span key={tag} className="auth-review-tag">
+                        {tag} ×{count}
+                      </span>
+                    ))}
+                  </div>
                 )}
+
+                {/* 프로필 수정 (선호 포지션 / 스킬 티어) */}
+                {isEditingProfile ? (
+                  <div className="auth-profile-edit">
+                    <div className="auth-field">
+                      <label>선호 포지션</label>
+                      <div className="auth-position-grid">
+                        {POSITION_OPTIONS.map((pos) => (
+                          <button
+                            key={pos.value}
+                            type="button"
+                            className={`auth-position-btn ${editProfile.preferredPosition === pos.value ? 'is-active' : ''}`}
+                            onClick={() =>
+                              setEditProfile((prev) => ({ ...prev, preferredPosition: pos.value }))
+                            }
+                          >
+                            <span className="auth-position-btn__label">{pos.label}</span>
+                            <span className="auth-position-btn__desc">{pos.desc}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="auth-field">
+                      <label>스킬 티어</label>
+                      <SkillMountain
+                        selectedValue={editProfile.skillTier}
+                        interactive
+                        onSelect={(value) =>
+                          setEditProfile((prev) => ({ ...prev, skillTier: value }))
+                        }
+                      />
+                    </div>
+                    <div className="auth-step-nav">
+                      <Button variant="secondary" onClick={() => setIsEditingProfile(false)}>
+                        취소
+                      </Button>
+                      <Button onClick={handleSaveProfile}>저장</Button>
+                    </div>
+                  </div>
+                ) : (
+                  currentUserTier && (
+                    <>
+                      <SkillMountain selectedValue={currentUser.skillTier} />
+                      <div className="auth-tier-card" style={{ borderColor: currentUserTier.color + '60', background: currentUserTier.color + '0e' }}>
+                        <strong style={{ color: currentUserTier.color }}>{currentUserTier.label}</strong>
+                        <span>{currentUserTier.description}</span>
+                      </div>
+                    </>
+                  )
+                )}
+
+                {message.text && (
+                  <p className={`auth-message ${message.isError ? 'is-error' : 'is-success'}`}>
+                    {message.text}
+                  </p>
+                )}
+
                 <div className="auth-actions">
+                  {!isEditingProfile && (
+                    <Button variant="primary" onClick={handleStartEditProfile}>
+                      ✏️ 프로필 수정
+                    </Button>
+                  )}
                   <Button
                     variant="secondary"
                     onClick={() => {

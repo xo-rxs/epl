@@ -22,11 +22,12 @@ const captureElement = async (element, options = {}) => {
     throw new Error('캡처 대상 요소가 없습니다.');
   }
 
+  // allowTaint를 켜면 외부 이미지로 캔버스가 오염되어 toBlob이 실패(이미지 깨짐)할 수 있어
+  // useCORS만 사용한다.
   return html2canvas(element, {
     scale: 2,
     backgroundColor: '#0b5d2a',
     useCORS: true,
-    allowTaint: true,
     logging: false,
     ...options,
   });

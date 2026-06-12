@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Layout, Container, Button } from '../components';
 import { useAuthData, useMatchData } from '../hooks';
+import { getMatchBadge } from '../utils/matchStatus';
 import '../styles/SchedulePage.css';
 
 const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -114,6 +115,7 @@ function SchedulePage() {
       { label: '일정', href: '/?page=schedule', active: true },
       { label: '팀 구성', href: '/?page=teams' },
       { label: '평가', href: '/?page=reviews' },
+      { label: '마이페이지', href: '/?page=auth' },
     ],
   };
 
@@ -272,12 +274,13 @@ function SchedulePage() {
                       </p>
                     </div>
                     <span
-                      className={[
-                        'schedule-match-card__status',
-                        match.status === 'recruiting' ? 'is-recruiting' : 'is-ready',
-                      ].join(' ')}
+                      className="schedule-match-card__status"
+                      style={{
+                        backgroundColor: getMatchBadge(match).color,
+                        color: 'var(--color-white)',
+                      }}
                     >
-                      {match.status === 'recruiting' ? '모집 중' : '준비 완료'}
+                      {getMatchBadge(match).label}
                     </span>
                   </a>
                 ))}
