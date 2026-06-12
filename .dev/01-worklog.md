@@ -1,5 +1,39 @@
 # Worklog
 
+## 2026-06-12
+
+### 작업 내용
+사용자 피드백(채팅방 수집분) 반영:
+- 모집 마감 표시: 정원 충족/수동 마감 시 회색 '마감' 배지, 남은 자리 2 이하 시 '마감임박 · N자리 남음' 배지 + 카드 빨간 테두리/옅은 빨간 배경 강조 (경기 목록 + 일정 페이지 공통, src/utils/matchStatus.js 신규)
+- 경기 목록 카드에 날짜·시간 표시 (이모지 대신 일시/장소/인원 라벨 행으로 표기)
+- 지역 범위: 경기 생성 시 지역(시/도) 선택 + 목록 '지역 필터' 버튼 → 체크박스 패널(다중 선택, 초기화 버튼)
+- 비공개 매치: 생성 폼 체크박스 → 목록 미노출, 공유 링크로만 접근
+- 공지사항: 관리 화면에서 작성/저장 → 참여 신청 화면에 노출
+- 모집 마감/재개 버튼 추가 (MatchActions), 마감 경기는 신청 버튼 비활성 + 안내
+- 평가 개편: 팀장 단독 → 참여자 전원이 평가 가능 (평가자별 reviewsByUser 저장), 본인은 평가 대상 제외
+- 익명 보장: 평가자 ID를 단방향 해시(anon_xxx)로만 저장
+- 평가 혜택: 평가는 선택사항 명시, 첫 저장 시 10P 적립 (epl_review_points)
+- 저장 토스트: 화면 하단 고정형으로 개선 + '마이페이지에서 확인 →' 버튼
+- 마이페이지: 선호 포지션/스킬 티어 수정 기능(useAuthData.updateProfile), 받은 평가 요약(평균 별점·횟수·자주 받은 태그)과 평가 포인트 표시
+- 전 페이지 네비게이션에 '마이페이지' 추가
+- CSV 팀 분배: 팀 확정 시 참여자 CSV에 '팀' 컬럼 포함 (MatchActions)
+- 이미지 깨짐 수정: html2canvas allowTaint 제거 (캔버스 오염 → toBlob 실패 원인)
+
+### 미반영 (백로그)
+- 팀 채팅방: 서버/실시간 인프라 필요, LocalStorage 기반 현 구조로는 불가
+
+### 주요 변경 파일
+- src/utils/matchStatus.js (신규), src/utils/constants.js (신규), src/utils/reviewPoints.js (신규)
+- src/pages/MatchPage.jsx, src/pages/ReviewPage.jsx, src/pages/AuthPage.jsx, src/pages/SchedulePage.jsx, src/pages/TeamPage.jsx, src/App.jsx
+- src/components/MatchForm.jsx, src/components/ParticipantForm.jsx, src/components/MatchActions.jsx
+- src/hooks/useAuthData.js
+- src/styles/AuthPage.css, src/styles/ReviewPage.css
+- src/utils/imageExport.js
+
+### 검증 결과
+- npm run lint: 기존 3개 에러 그대로 (신규 에러 0, stash 비교로 확인)
+- 브라우저 확인: 목록 배지/날짜/지역 필터, 비공개 숨김+링크 접근, 공지 저장→노출, 마감 경기 신청 차단, 본인 제외 평가→익명 저장→10P 적립(중복 적립 없음), 마이페이지 요약/프로필 수정 모두 정상
+
 ## 2026-06-09
 
 ### 작업 내용

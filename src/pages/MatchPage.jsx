@@ -10,6 +10,20 @@ import {
   Button,
 } from '../components';
 import { useAuthData, useMatchData } from '../hooks';
+import { getMatchBadge, isJoinClosed } from '../utils/matchStatus';
+import { REGION_OPTIONS } from '../utils/constants';
+
+// 경기 일시를 목록 카드용 문자열로 변환 (예: 6월 4일 (목) 20:00)
+const formatMatchDate = (datetime) => {
+  if (!datetime) return '일정 미정';
+  return new Date(datetime).toLocaleString('ko-KR', {
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
 
 /**
  * MatchPage 컴포넌트
@@ -31,6 +45,18 @@ function MatchPage() {
   const [currentView, setCurrentView] = useState('list');
   const [loading, setLoading] = useState(false);
   const [participantTab, setParticipantTab] = useState('pending');
+  const [selectedRegions, setSelectedRegions] = useState([]); // 빈 배열 = 전체 지역
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [noticeDraft, setNoticeDraft] = useState('');
+
+  // 지역 체크박스 토글
+  const toggleRegion = (region) => {
+    setSelectedRegions((prev) =>
+      prev.includes(region)
+        ? prev.filter((r) => r !== region)
+        : [...prev, region]
+    );
+  };
 
   const syncFromUrl = () => {
     const params = new URLSearchParams(window.location.search);
@@ -83,6 +109,7 @@ function MatchPage() {
 
     const match = matches.find((m) => m.id === selectedMatchId);
     setCurrentMatch(match || null);
+    setNoticeDraft(match?.notice || '');
   }, [matches, selectedMatchId]);
 
   // 경기 생성 처리
@@ -92,9 +119,11 @@ function MatchPage() {
       createMatch({
         title: formData.title,
         location: formData.location,
+        region: formData.region,
         datetime: formData.datetime,
         maxParticipants: parseInt(formData.maxParticipants, 10),
         description: formData.description,
+        isPrivate: Boolean(formData.isPrivate),
       });
 
       goToView('list');
@@ -200,6 +229,13 @@ function MatchPage() {
     alert('경기 상태가 변경되었습니다.');
   };
 
+  // 공지사항 저장
+  const handleSaveNotice = () => {
+    if (!currentMatch) return;
+    updateMatch(currentMatch.id, { notice: noticeDraft.trim() });
+    alert('공지사항이 저장되었습니다.');
+  };
+
   // 경기 삭제
   const handleDeleteMatch = () => {
     if (!currentMatch) return;
@@ -221,6 +257,7 @@ function MatchPage() {
       { label: '일정', href: '/?page=schedule' },
       { label: '팀 구성', href: '/?page=teams' },
       { label: '평가', href: '/?page=reviews' },
+      { label: '마이페이지', href: '/?page=auth' },
     ],
   };
 
@@ -285,11 +322,31 @@ function MatchPage() {
                   )}
                 </div>
 
+                {currentMatch.notice && (
+                  <div
+                    style={{
+                      padding: 'var(--spacing-4)',
+                      backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                      borderLeft: '4px solid var(--color-warning, #f39c12)',
+                      borderRadius: 'var(--radius-base)',
+                      marginBottom: 'var(--spacing-6)',
+                    }}
+                  >
+                    <strong style={{ display: 'block', marginBottom: 'var(--spacing-2)' }}>
+                      📢 공지사항
+                    </strong>
+                    <p style={{ fontSize: 'var(--font-size-sm)', whiteSpace: 'pre-wrap' }}>
+                      {currentMatch.notice}
+                    </p>
+                  </div>
+                )}
+
                 <ParticipantForm
                   onSubmit={handleAddParticipant}
                   currentUser={currentUser}
                   currentCount={(currentMatch.participants || []).filter((p) => getStatus(p) !== 'rejected').length}
                   maxCount={currentMatch.maxParticipants || 20}
+                  isClosed={isJoinClosed(currentMatch)}
                   loading={loading}
                 />
               </>
@@ -353,6 +410,45 @@ function MatchPage() {
                     </p>
                   )}
                 </div>
+              </div>
+            </div>
+
+            {/* 공지사항 작성 */}
+            <div
+              style={{
+                padding: 'var(--spacing-4)',
+                backgroundColor: 'var(--color-gray-50)',
+                border: '1px solid var(--color-gray-200)',
+                borderRadius: 'var(--radius-lg)',
+                marginBottom: 'var(--spacing-6)',
+              }}
+            >
+              <h3 style={{ fontSize: 'var(--font-size-base)', marginBottom: 'var(--spacing-2)' }}>
+                📢 공지사항
+              </h3>
+              <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-gray-600)', marginBottom: 'var(--spacing-3)' }}>
+                참여 신청 화면에 표시됩니다. (예: 준비물, 회비, 우천 시 안내)
+              </p>
+              <textarea
+                value={noticeDraft}
+                onChange={(e) => setNoticeDraft(e.target.value)}
+                placeholder="공지 내용을 입력하세요."
+                rows={3}
+                style={{
+                  width: '100%',
+                  padding: 'var(--spacing-3)',
+                  border: '1px solid var(--color-gray-300)',
+                  borderRadius: 'var(--radius-base)',
+                  fontSize: 'var(--font-size-sm)',
+                  fontFamily: 'inherit',
+                  resize: 'vertical',
+                  marginBottom: 'var(--spacing-3)',
+                }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button variant="primary" size="sm" onClick={handleSaveNotice}>
+                  공지 저장
+                </Button>
               </div>
             </div>
 
@@ -478,7 +574,103 @@ function MatchPage() {
               </button>
             </div>
 
-            {matches.length > 0 ? (
+            {/* 지역 필터 */}
+            <div style={{ marginBottom: 'var(--spacing-4)' }}>
+              <button
+                type="button"
+                className={['participant-tab-btn', selectedRegions.length > 0 && 'is-active']
+                  .filter(Boolean)
+                  .join(' ')}
+                aria-expanded={isFilterOpen}
+                onClick={() => setIsFilterOpen((prev) => !prev)}
+              >
+                지역 필터
+                {selectedRegions.length > 0 ? ` (${selectedRegions.length})` : ''}
+                {isFilterOpen ? ' ▲' : ' ▼'}
+              </button>
+
+              {isFilterOpen && (
+                <div
+                  style={{
+                    marginTop: 'var(--spacing-2)',
+                    padding: 'var(--spacing-4)',
+                    backgroundColor: 'var(--color-gray-50)',
+                    border: '1px solid var(--color-gray-200)',
+                    borderRadius: 'var(--radius-base)',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                      gap: 'var(--spacing-2)',
+                      marginBottom: 'var(--spacing-3)',
+                    }}
+                  >
+                    {REGION_OPTIONS.map((region) => (
+                      <label
+                        key={region}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 'var(--spacing-2)',
+                          fontSize: 'var(--font-size-sm)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedRegions.includes(region)}
+                          onChange={() => toggleRegion(region)}
+                        />
+                        {region}
+                      </label>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--spacing-3)' }}>
+                    <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-gray-600)' }}>
+                      {selectedRegions.length === 0
+                        ? '선택한 지역이 없으면 전체 경기가 표시됩니다.'
+                        : `${selectedRegions.join(', ')} 경기만 표시 중`}
+                    </span>
+                    {selectedRegions.length > 0 && (
+                      <Button variant="secondary" size="sm" onClick={() => setSelectedRegions([])}>
+                        초기화
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {(() => {
+              // 비공개 경기는 목록에서 숨기고(링크로만 접근), 선택된 지역 필터를 적용한다.
+              const visibleMatches = matches.filter(
+                (match) =>
+                  !match.isPrivate &&
+                  (selectedRegions.length === 0 || selectedRegions.includes(match.region))
+              );
+
+              if (visibleMatches.length === 0) {
+                return (
+                  <div style={{ padding: 'var(--spacing-6)', backgroundColor: 'var(--color-gray-50)', borderRadius: 'var(--radius-lg)' }}>
+                    <p style={{ marginBottom: 'var(--spacing-2)' }}>
+                      {matches.length === 0
+                        ? '아직 생성된 경기가 없습니다.'
+                        : '조건에 맞는 경기가 없습니다. 다른 지역을 선택해보세요.'}
+                    </p>
+                    <button
+                      type="button"
+                      className="participant-tab-btn is-active"
+                      onClick={() => goToView('create')}
+                    >
+                      {matches.length === 0 ? '첫 경기 만들기' : '+ 새 경기 생성'}
+                    </button>
+                  </div>
+                );
+              }
+
+              return (
               <div
                 style={{
                   display: 'grid',
@@ -486,62 +678,100 @@ function MatchPage() {
                   gap: 'var(--spacing-4)',
                 }}
               >
-                {matches.map((match) => (
+                {visibleMatches.map((match) => {
+                  const badge = getMatchBadge(match);
+                  const isImminent = badge.type === 'imminent';
+                  // 마감임박 경기는 빨간 테두리 + 옅은 빨간 배경으로 강조
+                  const baseBorderColor = isImminent ? 'var(--color-error)' : 'var(--color-gray-400)';
+                  const metaRows = [
+                    ['일시', formatMatchDate(match.datetime)],
+                    ['장소', `${match.region ? `[${match.region}] ` : ''}${match.location}`],
+                    ['인원', `${match.participants.length} / ${match.maxParticipants}`],
+                  ];
+
+                  return (
                   <div
                     key={match.id}
                     onClick={() => goToView('join', match.id)}
                     style={{
                       padding: 'var(--spacing-4)',
-                      backgroundColor: 'var(--color-gray-50)',
-                      border: '2px solid var(--color-gray-400)',
+                      backgroundColor: isImminent ? 'rgba(231, 76, 60, 0.04)' : 'var(--color-gray-50)',
+                      border: `2px solid ${baseBorderColor}`,
                       borderRadius: 'var(--radius-base)',
                       cursor: 'pointer',
                       transition: 'all var(--transition-base)',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                      e.currentTarget.style.boxShadow = isImminent
+                        ? '0 8px 20px rgba(231, 76, 60, 0.25)'
+                        : 'var(--shadow-lg)';
                       e.currentTarget.style.transform = 'translateY(-4px)';
-                      e.currentTarget.style.borderColor = 'var(--color-primary)';
+                      e.currentTarget.style.borderColor = isImminent
+                        ? 'var(--color-error)'
+                        : 'var(--color-primary)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.boxShadow = 'none';
                       e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.borderColor = 'var(--color-gray-400)';
+                      e.currentTarget.style.borderColor = baseBorderColor;
                     }}
                   >
-                    <h4 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-2)' }}>
-                      {match.title}
-                    </h4>
-                    <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-gray-600)', marginBottom: 'var(--spacing-2)' }}>
-                      📍 {match.location}
-                    </p>
-                    <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-gray-600)', marginBottom: 'var(--spacing-2)' }}>
-                      👥 {match.participants.length} / {match.maxParticipants}
-                    </p>
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        padding: 'var(--spacing-1) var(--spacing-2)',
-                        backgroundColor: match.status === 'recruiting' ? 'var(--color-info)' : 'var(--color-success)',
-                        color: 'var(--color-white)',
-                        borderRadius: 'var(--radius-full)',
-                        fontSize: 'var(--font-size-xs)',
-                        fontWeight: 'var(--font-weight-bold)',
-                        marginBottom: 'var(--spacing-3)',
-                      }}
-                    >
-                      {match.status === 'recruiting' ? '모집 중' : '준비 완료'}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-2)' }}>
+                      <h4 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-bold)' }}>
+                        {match.title}
+                      </h4>
+                      <span
+                        style={{
+                          flexShrink: 0,
+                          padding: 'var(--spacing-1) var(--spacing-2)',
+                          backgroundColor: badge.color,
+                          color: 'var(--color-white)',
+                          borderRadius: 'var(--radius-full)',
+                          fontSize: 'var(--font-size-xs)',
+                          fontWeight: 'var(--font-weight-bold)',
+                        }}
+                      >
+                        {badge.label}
+                      </span>
+                    </div>
+                    <div style={{ marginBottom: 'var(--spacing-3)' }}>
+                      {metaRows.map(([label, value]) => (
+                        <p
+                          key={label}
+                          style={{
+                            display: 'flex',
+                            gap: 'var(--spacing-2)',
+                            fontSize: 'var(--font-size-sm)',
+                            color: 'var(--color-gray-600)',
+                            marginBottom: 'var(--spacing-1)',
+                          }}
+                        >
+                          <span
+                            style={{
+                              flexShrink: 0,
+                              width: '28px',
+                              fontSize: 'var(--font-size-xs)',
+                              fontWeight: 'var(--font-weight-bold)',
+                              color: 'var(--color-gray-400)',
+                            }}
+                          >
+                            {label}
+                          </span>
+                          {value}
+                        </p>
+                      ))}
+                    </div>
                     <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
                       <Button
                         variant="primary"
                         size="sm"
+                        disabled={isJoinClosed(match)}
                         onClick={(event) => {
                           event.stopPropagation();
                           goToView('join', match.id);
                         }}
                       >
-                        참여
+                        {isJoinClosed(match) ? '마감' : '참여'}
                       </Button>
                       <Button
                         variant="secondary"
@@ -555,20 +785,11 @@ function MatchPage() {
                       </Button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
-            ) : (
-              <div style={{ padding: 'var(--spacing-6)', backgroundColor: 'var(--color-gray-50)', borderRadius: 'var(--radius-lg)' }}>
-                <p style={{ marginBottom: 'var(--spacing-2)' }}>아직 생성된 경기가 없습니다.</p>
-                <button
-                  type="button"
-                  className="participant-tab-btn is-active"
-                  onClick={() => goToView('create')}
-                >
-                  첫 경기 만들기
-                </button>
-              </div>
-            )}
+              );
+            })()}
           </div>
         )}
       </Container>

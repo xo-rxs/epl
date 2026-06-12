@@ -2,6 +2,7 @@ import Button from './Button';
 import Input from './Input';
 import Card from './Card';
 import { useForm } from '../hooks';
+import { REGION_OPTIONS } from '../utils/constants';
 
 /**
  * MatchForm 컴포넌트
@@ -14,9 +15,11 @@ function MatchForm({ onSubmit, loading = false }) {
     {
       title: '',
       location: '',
+      region: '서울',
       datetime: '',
       maxParticipants: 20,
       description: '',
+      isPrivate: false,
     },
     onSubmit
   );
@@ -100,6 +103,40 @@ function MatchForm({ onSubmit, loading = false }) {
           required
         />
 
+        <div style={{ marginBottom: 'var(--spacing-4)' }}>
+          <label
+            htmlFor="match-region"
+            style={{
+              display: 'block',
+              marginBottom: 'var(--spacing-2)',
+              fontSize: 'var(--font-size-sm)',
+              fontWeight: 'var(--font-weight-bold)',
+            }}
+          >
+            지역 <span style={{ color: 'var(--color-error)' }}>*</span>
+          </label>
+          <select
+            id="match-region"
+            name="region"
+            value={form.values.region}
+            onChange={form.handleChange}
+            style={{
+              width: '100%',
+              padding: 'var(--spacing-3)',
+              border: '1px solid var(--color-gray-300)',
+              borderRadius: 'var(--radius-base)',
+              fontSize: 'var(--font-size-base)',
+              backgroundColor: 'var(--color-white)',
+            }}
+          >
+            {REGION_OPTIONS.map((region) => (
+              <option key={region} value={region}>
+                {region}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <Input
           label="날짜 및 시간"
           type="datetime-local"
@@ -131,6 +168,39 @@ function MatchForm({ onSubmit, loading = false }) {
           hint="예: 초급자 환영, 풋살 경기 등"
           name="description"
         />
+
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 'var(--spacing-2)',
+            padding: 'var(--spacing-3)',
+            backgroundColor: 'var(--color-gray-50)',
+            border: '1px solid var(--color-gray-200)',
+            borderRadius: 'var(--radius-base)',
+            cursor: 'pointer',
+          }}
+        >
+          <input
+            type="checkbox"
+            name="isPrivate"
+            checked={form.values.isPrivate}
+            onChange={form.handleChange}
+            style={{ marginTop: '3px' }}
+          />
+          <span>
+            <strong style={{ fontSize: 'var(--font-size-sm)' }}>🔒 비공개 경기</strong>
+            <span
+              style={{
+                display: 'block',
+                fontSize: 'var(--font-size-xs)',
+                color: 'var(--color-gray-600)',
+              }}
+            >
+              경기 목록에 노출되지 않고, 공유 링크를 받은 사람만 참여할 수 있습니다.
+            </span>
+          </span>
+        </label>
       </form>
     </Card>
   );
