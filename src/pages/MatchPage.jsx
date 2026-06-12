@@ -45,8 +45,18 @@ function MatchPage() {
   const [currentView, setCurrentView] = useState('list');
   const [loading, setLoading] = useState(false);
   const [participantTab, setParticipantTab] = useState('pending');
-  const [regionFilter, setRegionFilter] = useState('all');
+  const [selectedRegions, setSelectedRegions] = useState([]); // 빈 배열 = 전체 지역
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [noticeDraft, setNoticeDraft] = useState('');
+
+  // 지역 체크박스 토글
+  const toggleRegion = (region) => {
+    setSelectedRegions((prev) =>
+      prev.includes(region)
+        ? prev.filter((r) => r !== region)
+        : [...prev, region]
+    );
+  };
 
   const syncFromUrl = () => {
     const params = new URLSearchParams(window.location.search);
@@ -565,31 +575,80 @@ function MatchPage() {
             </div>
 
             {/* 지역 필터 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-4)', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-gray-600)' }}>🗺️ 지역</span>
-              {['all', ...REGION_OPTIONS].map((region) => (
-                <button
-                  key={region}
-                  type="button"
-                  className={[
-                    'participant-tab-btn',
-                    regionFilter === region && 'is-active',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  onClick={() => setRegionFilter(region)}
+            <div style={{ marginBottom: 'var(--spacing-4)' }}>
+              <button
+                type="button"
+                className={['participant-tab-btn', selectedRegions.length > 0 && 'is-active']
+                  .filter(Boolean)
+                  .join(' ')}
+                aria-expanded={isFilterOpen}
+                onClick={() => setIsFilterOpen((prev) => !prev)}
+              >
+                지역 필터
+                {selectedRegions.length > 0 ? ` (${selectedRegions.length})` : ''}
+                {isFilterOpen ? ' ▲' : ' ▼'}
+              </button>
+
+              {isFilterOpen && (
+                <div
+                  style={{
+                    marginTop: 'var(--spacing-2)',
+                    padding: 'var(--spacing-4)',
+                    backgroundColor: 'var(--color-gray-50)',
+                    border: '1px solid var(--color-gray-200)',
+                    borderRadius: 'var(--radius-base)',
+                  }}
                 >
-                  {region === 'all' ? '전체' : region}
-                </button>
-              ))}
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                      gap: 'var(--spacing-2)',
+                      marginBottom: 'var(--spacing-3)',
+                    }}
+                  >
+                    {REGION_OPTIONS.map((region) => (
+                      <label
+                        key={region}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 'var(--spacing-2)',
+                          fontSize: 'var(--font-size-sm)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedRegions.includes(region)}
+                          onChange={() => toggleRegion(region)}
+                        />
+                        {region}
+                      </label>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--spacing-3)' }}>
+                    <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-gray-600)' }}>
+                      {selectedRegions.length === 0
+                        ? '선택한 지역이 없으면 전체 경기가 표시됩니다.'
+                        : `${selectedRegions.join(', ')} 경기만 표시 중`}
+                    </span>
+                    {selectedRegions.length > 0 && (
+                      <Button variant="secondary" size="sm" onClick={() => setSelectedRegions([])}>
+                        초기화
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {(() => {
-              // 비공개 경기는 목록에서 숨기고(링크로만 접근), 지역 필터를 적용한다.
+              // 비공개 경기는 목록에서 숨기고(링크로만 접근), 선택된 지역 필터를 적용한다.
               const visibleMatches = matches.filter(
                 (match) =>
                   !match.isPrivate &&
-                  (regionFilter === 'all' || match.region === regionFilter)
+                  (selectedRegions.length === 0 || selectedRegions.includes(match.region))
               );
 
               if (visibleMatches.length === 0) {
@@ -621,6 +680,14 @@ function MatchPage() {
               >
                 {visibleMatches.map((match) => {
                   const badge = getMatchBadge(match);
+                  const isImminent = badge.type === 'imminent';
+                  // 마감임박 경기는 빨간 테두리 + 옅은 빨간 배경으로 강조
+                  const baseBorderColor = isImminent ? 'var(--color-error)' : 'var(--color-gray-400)';
+                  const metaRows = [
+                    ['일시', formatMatchDate(match.datetime)],
+                    ['장소', `${match.region ? `[${match.region}] ` : ''}${match.location}`],
+                    ['인원', `${match.participants.length} / ${match.maxParticipants}`],
+                  ];
 
                   return (
                   <div
@@ -628,49 +695,72 @@ function MatchPage() {
                     onClick={() => goToView('join', match.id)}
                     style={{
                       padding: 'var(--spacing-4)',
-                      backgroundColor: 'var(--color-gray-50)',
-                      border: '2px solid var(--color-gray-400)',
+                      backgroundColor: isImminent ? 'rgba(231, 76, 60, 0.04)' : 'var(--color-gray-50)',
+                      border: `2px solid ${baseBorderColor}`,
                       borderRadius: 'var(--radius-base)',
                       cursor: 'pointer',
                       transition: 'all var(--transition-base)',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                      e.currentTarget.style.boxShadow = isImminent
+                        ? '0 8px 20px rgba(231, 76, 60, 0.25)'
+                        : 'var(--shadow-lg)';
                       e.currentTarget.style.transform = 'translateY(-4px)';
-                      e.currentTarget.style.borderColor = 'var(--color-primary)';
+                      e.currentTarget.style.borderColor = isImminent
+                        ? 'var(--color-error)'
+                        : 'var(--color-primary)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.boxShadow = 'none';
                       e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.borderColor = 'var(--color-gray-400)';
+                      e.currentTarget.style.borderColor = baseBorderColor;
                     }}
                   >
-                    <h4 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-2)' }}>
-                      {match.title}
-                    </h4>
-                    <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-gray-600)', marginBottom: 'var(--spacing-2)' }}>
-                      🗓️ {formatMatchDate(match.datetime)}
-                    </p>
-                    <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-gray-600)', marginBottom: 'var(--spacing-2)' }}>
-                      📍 {match.region ? `[${match.region}] ` : ''}{match.location}
-                    </p>
-                    <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-gray-600)', marginBottom: 'var(--spacing-2)' }}>
-                      👥 {match.participants.length} / {match.maxParticipants}
-                    </p>
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        padding: 'var(--spacing-1) var(--spacing-2)',
-                        backgroundColor: badge.color,
-                        color: 'var(--color-white)',
-                        borderRadius: 'var(--radius-full)',
-                        fontSize: 'var(--font-size-xs)',
-                        fontWeight: 'var(--font-weight-bold)',
-                        marginBottom: 'var(--spacing-3)',
-                      }}
-                    >
-                      {badge.label}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-2)' }}>
+                      <h4 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-bold)' }}>
+                        {match.title}
+                      </h4>
+                      <span
+                        style={{
+                          flexShrink: 0,
+                          padding: 'var(--spacing-1) var(--spacing-2)',
+                          backgroundColor: badge.color,
+                          color: 'var(--color-white)',
+                          borderRadius: 'var(--radius-full)',
+                          fontSize: 'var(--font-size-xs)',
+                          fontWeight: 'var(--font-weight-bold)',
+                        }}
+                      >
+                        {badge.label}
+                      </span>
+                    </div>
+                    <div style={{ marginBottom: 'var(--spacing-3)' }}>
+                      {metaRows.map(([label, value]) => (
+                        <p
+                          key={label}
+                          style={{
+                            display: 'flex',
+                            gap: 'var(--spacing-2)',
+                            fontSize: 'var(--font-size-sm)',
+                            color: 'var(--color-gray-600)',
+                            marginBottom: 'var(--spacing-1)',
+                          }}
+                        >
+                          <span
+                            style={{
+                              flexShrink: 0,
+                              width: '28px',
+                              fontSize: 'var(--font-size-xs)',
+                              fontWeight: 'var(--font-weight-bold)',
+                              color: 'var(--color-gray-400)',
+                            }}
+                          >
+                            {label}
+                          </span>
+                          {value}
+                        </p>
+                      ))}
+                    </div>
                     <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
                       <Button
                         variant="primary"

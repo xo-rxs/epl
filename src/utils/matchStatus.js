@@ -22,23 +22,24 @@ export const isJoinClosed = (match) =>
 
 /**
  * 경기 상태 배지 계산
- * @returns {{label: string, color: string}} 배지 라벨과 배경색
+ * @returns {{type: string, label: string, color: string}} 배지 종류·라벨·배경색
+ *   type: 'closed' | 'ready' | 'imminent' | 'recruiting'
  */
 export const getMatchBadge = (match) => {
   if (match.status === 'closed' || isMatchFull(match)) {
-    return { label: '마감', color: 'var(--color-gray-600)' };
+    return { type: 'closed', label: '마감', color: 'var(--color-gray-600)' };
   }
 
   if (match.status === 'ready') {
-    return { label: '준비 완료', color: 'var(--color-success)' };
+    return { type: 'ready', label: '준비 완료', color: 'var(--color-success)' };
   }
 
   const remaining = (match.maxParticipants || 0) - getActiveParticipantCount(match);
   if (remaining <= IMMINENT_REMAINING_SLOTS) {
-    return { label: `🔥 마감임박 (${remaining}자리)`, color: 'var(--color-error)' };
+    return { type: 'imminent', label: `마감임박 · ${remaining}자리 남음`, color: 'var(--color-error)' };
   }
 
-  return { label: '모집 중', color: 'var(--color-info)' };
+  return { type: 'recruiting', label: '모집 중', color: 'var(--color-info)' };
 };
 
 // 경기 상태 한글 라벨
