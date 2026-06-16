@@ -26,6 +26,10 @@ export const isJoinClosed = (match) =>
  *   type: 'closed' | 'ready' | 'imminent' | 'recruiting'
  */
 export const getMatchBadge = (match) => {
+  if (match.status === 'finished') {
+    return { type: 'finished', label: '경기 종료', color: 'var(--color-gray-500)' };
+  }
+
   if (match.status === 'closed' || isMatchFull(match)) {
     return { type: 'closed', label: '마감', color: 'var(--color-gray-600)' };
   }
@@ -47,4 +51,5 @@ export const MATCH_STATUS_LABEL = {
   recruiting: '모집 중',
   ready: '준비 완료',
   closed: '마감',
+  finished: '경기 종료',
 };

@@ -4,7 +4,6 @@ const USERS_KEY = 'epl_users';
 const CURRENT_USER_KEY = 'epl_current_user';
 const AUTH_EVENT_NAME = 'epl_auth_change';
 const POSITION_OPTIONS = ['GK', 'DF', 'MF', 'FW'];
-const SKILL_TIER_OPTIONS = ['THE_GOAT', 'ALPINE', 'PEAK', 'HIKER', 'VALLEY'];
 
 const readJson = (key, fallback) => {
   try {
@@ -81,7 +80,6 @@ function useAuthData() {
     const name = (formData.name || '').trim();
     const age = Number(formData.age);
     const preferredPosition = formData.preferredPosition || '';
-    const skillTier = formData.skillTier || '';
     const password = formData.password || '';
     const passwordConfirm = formData.passwordConfirm || '';
     const savedUsers = readJson(USERS_KEY, []);
@@ -100,10 +98,6 @@ function useAuthData() {
 
     if (!POSITION_OPTIONS.includes(preferredPosition)) {
       return { ok: false, message: '선호 포지션을 선택해주세요.' };
-    }
-
-    if (!SKILL_TIER_OPTIONS.includes(skillTier)) {
-      return { ok: false, message: '스킬 티어를 선택해주세요.' };
     }
 
     if (password.length < 6) {
@@ -125,7 +119,7 @@ function useAuthData() {
       nickname: name,
       age,
       preferredPosition,
-      skillTier,
+      skillTier: null,
       passwordHash: hashPassword(password),
       createdAt: new Date().toISOString(),
     };
@@ -187,13 +181,6 @@ function useAuthData() {
         return { ok: false, message: '선호 포지션을 선택해주세요.' };
       }
       nextProfile.preferredPosition = updates.preferredPosition;
-    }
-
-    if (updates.skillTier !== undefined) {
-      if (!SKILL_TIER_OPTIONS.includes(updates.skillTier)) {
-        return { ok: false, message: '스킬 티어를 선택해주세요.' };
-      }
-      nextProfile.skillTier = updates.skillTier;
     }
 
     const savedUsers = readJson(USERS_KEY, []);

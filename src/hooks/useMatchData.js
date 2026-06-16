@@ -125,7 +125,6 @@ const normalizeDummyMatch = (match) => {
     datetime: dummyMatch.datetime,
     maxParticipants: dummyMatch.maxParticipants,
     description: dummyMatch.description,
-    status: dummyMatch.status,
     participants: [
       ...dummyMatch.participants,
       ...realParticipants.slice(0, availableSlots),

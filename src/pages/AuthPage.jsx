@@ -2,7 +2,14 @@ import { useMemo, useState } from 'react';
 import { Layout, Container, Input, Button } from '../components';
 import { useAuthData, useMatchData } from '../hooks';
 import { getReviewPoints } from '../utils/reviewPoints';
-import { getPeerSkillStats, getTierValueFromScore } from '../utils/skillScore';
+import {
+  getObjectiveSkillScore,
+  getPeerSkillStats,
+  getTierValueFromScore,
+  getTierProgress,
+  SCORE_BY_TIER,
+  scoreToMeters,
+} from '../utils/skillScore';
 import '../styles/AuthPage.css';
 
 const INITIAL_FORM = {
@@ -10,7 +17,6 @@ const INITIAL_FORM = {
   name: '',
   age: '',
   preferredPosition: 'MF',
-  skillTier: '',
   password: '',
   passwordConfirm: '',
 };
@@ -101,22 +107,67 @@ const SkillMountain = ({ selectedValue, interactive = false, onSelect }) => {
   );
 };
 
-/* 단계 표시 컴포넌트 */
-const StepIndicator = ({ current, total }) => (
-  <div className="auth-steps">
-    {Array.from({ length: total }, (_, i) => (
-      <div key={i} className={`auth-step ${i < current ? 'is-done' : ''} ${i === current ? 'is-current' : ''}`}>
-        <div className="auth-step__dot">
-          {i < current ? '✓' : i + 1}
+// 다음 티어 시작 고도 (승급 경계)
+const NEXT_TIER_METERS = { HIKER: 500, PEAK: 1500, ALPINE: 4000, THE_GOAT: 8000 };
+
+/* 티어 진행 바 컴포넌트 */
+function TierProgressBar({ objectiveScore, peerCount, isUnranked }) {
+  const progress = getTierProgress(objectiveScore);
+  const currentDef = SKILL_TIERS.find((t) => t.value === progress.current);
+  const nextDef = progress.next ? SKILL_TIERS.find((t) => t.value === progress.next) : null;
+
+  const currentMeters = scoreToMeters(objectiveScore);
+  const metersToNext = nextDef ? NEXT_TIER_METERS[nextDef.value] - currentMeters : 0;
+  const fmt = (m) => m.toLocaleString('ko-KR');
+
+  if (isUnranked) {
+    return (
+      <div className="auth-tier-progress">
+        <div className="auth-tier-progress__header">
+          <strong className="auth-tier-progress__name" style={{ color: 'var(--color-gray-400)' }}>
+            언랭크
+          </strong>
+          <span className="auth-tier-progress__altitude" style={{ color: 'var(--color-gray-400)', borderColor: 'var(--color-gray-200)' }}>0m</span>
         </div>
-        <span className="auth-step__label">
-          {i === 0 ? '기본 정보' : '스킬 티어'}
-        </span>
+        <div className="auth-tier-progress__bar">
+          <div className="auth-tier-progress__fill" style={{ width: '0%', backgroundColor: 'var(--color-gray-300)' }} />
+        </div>
+        <div className="auth-tier-progress__meta">
+          <span>0m</span>
+          <span>경기에 참여하고 동료 평가를 받으면 티어가 결정돼요</span>
+        </div>
       </div>
-    ))}
-    <div className="auth-step__line" style={{ width: `${((current) / (total - 1)) * 100}%` }} />
-  </div>
-);
+    );
+  }
+
+  return (
+    <div className="auth-tier-progress">
+      <div className="auth-tier-progress__header">
+        <strong className="auth-tier-progress__name" style={{ color: currentDef?.color }}>
+          {currentDef?.label ?? '-'}
+        </strong>
+        <span className="auth-tier-progress__altitude">{fmt(currentMeters)}m</span>
+        {peerCount > 0 && (
+          <span className="auth-tier-progress__count">동료 평가 {peerCount}회 반영</span>
+        )}
+      </div>
+      <div className="auth-tier-progress__bar">
+        <div
+          className="auth-tier-progress__fill"
+          style={{ width: `${progress.pct}%`, backgroundColor: currentDef?.color }}
+        />
+      </div>
+      <div className="auth-tier-progress__meta">
+        <span>{currentDef?.marker}</span>
+        {nextDef ? (
+          <span>{nextDef.label}까지 {fmt(metersToNext)}m</span>
+        ) : (
+          <span>에베레스트 정상 (8,848m)</span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 /**
  * AuthPage 컴포넌트
@@ -129,11 +180,9 @@ function AuthPage() {
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [message, setMessage] = useState({ text: '', isError: false });
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [editProfile, setEditProfile] = useState({ preferredPosition: 'MF', skillTier: 'HIKER' });
+  const [editProfile, setEditProfile] = useState({ preferredPosition: 'MF' });
 
   const isLogin = mode === 'login';
-  const currentUserTier = SKILL_TIERS.find((t) => t.value === currentUser?.skillTier);
-
   // 내가 받은 익명 평가 요약 (실력·매너 평균, 받은 평가 수, 자주 받은 태그)
   const reviewSummary = useMemo(() => {
     if (!currentUser) return null;
@@ -185,17 +234,22 @@ function AuthPage() {
     ? getPeerSkillStats(matches, currentUser.id)
     : { count: 0, avg: 0 };
 
-  // 동료 평가가 있으면 동료 평균 별점을 티어로 환산해 표시, 없으면 자기평가 티어
+  // 자기평가 + 동료평가 블렌딩된 객관 점수 (팀 배정에 쓰이는 것과 동일)
+  const selfScore = SCORE_BY_TIER[currentUser?.skillTier] || 3;
+  const objectiveScore = currentUser
+    ? getObjectiveSkillScore(selfScore, matches, currentUser.id)
+    : selfScore;
+
   const isTierAdjusted = peerSkillStats.count > 0;
-  const displayTier = isTierAdjusted
-    ? SKILL_TIERS.find((t) => t.value === getTierValueFromScore(peerSkillStats.avg))
-    : currentUserTier;
+  const isUnranked = !currentUser?.skillTier && peerSkillStats.count === 0;
+  const displayTier = isUnranked
+    ? null
+    : SKILL_TIERS.find((t) => t.value === getTierValueFromScore(objectiveScore)) ?? null;
 
 
   const handleStartEditProfile = () => {
     setEditProfile({
       preferredPosition: currentUser?.preferredPosition || 'MF',
-      skillTier: currentUser?.skillTier || 'HIKER',
     });
     setIsEditingProfile(true);
     setMessage({ text: '', isError: false });
@@ -252,17 +306,14 @@ function AuthPage() {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const result = isLogin ? login(formData) : signUp(formData);
+    const result = login(formData);
 
     if (!result.ok) {
       setMessage({ text: result.message, isError: true });
       return;
     }
 
-    setMessage({
-      text: isLogin ? '로그인되었습니다.' : '회원가입이 완료되었습니다.',
-      isError: false,
-    });
+    setMessage({ text: '로그인되었습니다.', isError: false });
   };
 
   /* 비밀번호 강도 */
@@ -308,10 +359,12 @@ function AuthPage() {
                     ['나이', currentUser.age ? `${currentUser.age}세` : '미입력'],
                     ['선호 포지션', currentUser.preferredPosition || '미입력'],
                     [
-                      '스킬 티어',
-                      displayTier
-                        ? `${displayTier.label} · ${displayTier.range}${isTierAdjusted ? ' (동료 평가 보정)' : ''}`
-                        : '언랭',
+                      '현재 고도',
+                      isUnranked
+                        ? '언랭크 · 동료 평가 0회'
+                        : displayTier
+                          ? `${displayTier.label} · ${scoreToMeters(objectiveScore).toLocaleString('ko-KR')}m${isTierAdjusted ? ' (동료 평가 보정)' : ''}`
+                          : '언랭크',
                     ],
                   ].map(([dt, dd]) => (
                     <div key={dt}>
@@ -320,6 +373,13 @@ function AuthPage() {
                     </div>
                   ))}
                 </dl>
+
+                {/* 변동 스킬 티어 진행 바 */}
+                <TierProgressBar
+                  objectiveScore={objectiveScore}
+                  peerCount={peerSkillStats.count}
+                  isUnranked={isUnranked}
+                />
 
                 {/* 받은 평가 요약 + 평가 포인트 */}
                 <div className="auth-review-summary">
@@ -377,16 +437,6 @@ function AuthPage() {
                           </button>
                         ))}
                       </div>
-                    </div>
-                    <div className="auth-field">
-                      <label>스킬 티어</label>
-                      <SkillMountain
-                        selectedValue={editProfile.skillTier}
-                        interactive
-                        onSelect={(value) =>
-                          setEditProfile((prev) => ({ ...prev, skillTier: value }))
-                        }
-                      />
                     </div>
                     <div className="auth-step-nav">
                       <Button variant="secondary" onClick={() => setIsEditingProfile(false)}>
