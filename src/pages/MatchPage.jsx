@@ -226,7 +226,6 @@ function MatchPage() {
   const handleStatusChange = (newStatus) => {
     if (!currentMatch) return;
     updateMatch(currentMatch.id, { status: newStatus });
-    alert('경기 상태가 변경되었습니다.');
   };
 
   // 공지사항 저장

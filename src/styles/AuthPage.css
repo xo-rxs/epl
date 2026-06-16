@@ -610,3 +610,64 @@
   font-size: var(--font-size-xs);
   color: var(--color-gray-500);
 }
+
+/* ── 변동 티어 진행 바 ── */
+.auth-tier-progress {
+  display: grid;
+  gap: var(--spacing-2);
+  padding: var(--spacing-4);
+  background: var(--color-gray-50);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+}
+
+.auth-tier-progress__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.auth-tier-progress__name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.auth-tier-progress__altitude {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-700);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-300);
+  padding: 2px var(--spacing-2);
+  border-radius: var(--radius-full);
+}
+
+.auth-tier-progress__count {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-500);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-300);
+  padding: 2px var(--spacing-2);
+  border-radius: var(--radius-full);
+}
+
+.auth-tier-progress__bar {
+  height: 10px;
+  background: var(--color-gray-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.auth-tier-progress__fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+}
+
+.auth-tier-progress__meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-500);
+}

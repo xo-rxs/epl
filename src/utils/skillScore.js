@@ -68,6 +68,15 @@ const TIER_BY_SCORE = {
   5: 'THE_GOAT',
 };
 
+// 스킬 티어 값 → 점수 매핑 (역방향)
+export const SCORE_BY_TIER = {
+  VALLEY: 1,
+  HIKER: 2,
+  PEAK: 3,
+  ALPINE: 4,
+  THE_GOAT: 5,
+};
+
 /**
  * 보정 점수를 스킬 티어 값으로 환산 (반올림, 1~5로 클램프)
  * @param {number} score - 실력 점수 (1~5, 소수 허용)
@@ -76,4 +85,54 @@ const TIER_BY_SCORE = {
 export const getTierValueFromScore = (score) => {
   const rounded = Math.min(5, Math.max(1, Math.round(score)));
   return TIER_BY_SCORE[rounded];
+};
+
+// 점수(1~5) ↔ 고도(m) 변환 기준점
+// 에베레스트(8,848m)를 5점 만점 기준으로 설정
+const SCORE_METER_BREAKPOINTS = [
+  { score: 1.0, meter: 0 },
+  { score: 1.5, meter: 500 },
+  { score: 2.5, meter: 1500 },
+  { score: 3.5, meter: 4000 },
+  { score: 4.5, meter: 8000 },
+  { score: 5.0, meter: 8848 },
+];
+
+/**
+ * 점수를 고도(m)로 변환 (구간별 선형 보간)
+ * @param {number} score - 실력 점수 (1~5)
+ * @returns {number} 고도 (m)
+ */
+export const scoreToMeters = (score) => {
+  const clamped = Math.max(1, Math.min(5, score));
+  for (let i = 0; i < SCORE_METER_BREAKPOINTS.length - 1; i++) {
+    const from = SCORE_METER_BREAKPOINTS[i];
+    const to = SCORE_METER_BREAKPOINTS[i + 1];
+    if (clamped >= from.score && clamped <= to.score) {
+      const t = (clamped - from.score) / (to.score - from.score);
+      return Math.round(from.meter + t * (to.meter - from.meter));
+    }
+  }
+  return 8848;
+};
+
+/**
+ * 현재 티어 내 진행률 계산
+ * 티어 경계: VALLEY [1.0~1.5), HIKER [1.5~2.5), PEAK [2.5~3.5), ALPINE [3.5~4.5), THE_GOAT [4.5~5.0]
+ * @param {number} score - 실력 점수 (1~5, 소수 허용)
+ * @returns {{ current: string, next: string|null, pct: number, score: number }}
+ */
+export const getTierProgress = (score) => {
+  const clamped = Math.max(1, Math.min(5, score));
+  const tier = Math.min(5, Math.max(1, Math.round(clamped)));
+  const lower = tier === 1 ? 1.0 : tier - 0.5;
+  const upper = tier === 5 ? 5.0 : tier + 0.5;
+  const pct = Math.round(((clamped - lower) / (upper - lower)) * 100);
+  const next = tier < 5 ? TIER_BY_SCORE[tier + 1] : null;
+  return {
+    current: TIER_BY_SCORE[tier],
+    next,
+    pct: Math.max(0, Math.min(100, pct)),
+    score: Math.round(clamped * 10) / 10,
+  };
 };
