@@ -191,6 +191,7 @@ function AuthPage() {
     ? SKILL_TIERS.find((t) => t.value === getTierValueFromScore(peerSkillStats.avg))
     : currentUserTier;
 
+
   const handleStartEditProfile = () => {
     setEditProfile({
       preferredPosition: currentUser?.preferredPosition || 'MF',

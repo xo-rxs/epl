@@ -40,14 +40,12 @@ function ParticipantForm({
   const { matches } = useMatchData();
   const isFull = isClosed || currentCount >= maxCount;
   const selfSkillScore = SKILL_TIER_SCORE[currentUser?.skillTier] || 3;
-  // 동료 실력 평가가 있으면 자기평가와 합산한 보정 점수를 사용 (팀 배정 객관화)
   const peerStats = currentUser
     ? getPeerSkillStats(matches, currentUser.id)
     : { count: 0, avg: 0 };
   const skillScore = currentUser
     ? getObjectiveSkillScore(selfSkillScore, matches, currentUser.id)
     : selfSkillScore;
-  // 동료 평가로 보정된 점수를 환산한 티어를 표시 (평가 없으면 자기평가 티어)
   const displayTierValue =
     peerStats.count > 0 ? getTierValueFromScore(skillScore) : currentUser?.skillTier;
   const skillTierLabel = SKILL_TIER_LABEL[displayTierValue] || '미입력';
