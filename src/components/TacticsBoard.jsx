@@ -467,7 +467,7 @@ function TacticsBoard({ match }) {
   }
 
   return (
-    <Card header={<h3 className="card-header-title">🧩 전술 배치도</h3>}>
+    <Card header={<h3 className="card-header-title">전술 배치도</h3>}>
       <div className="tactics-board">
         <div className="tactics-board-meta">
           <div>
@@ -586,10 +586,10 @@ function TacticsBoard({ match }) {
 
         <div className="tactics-board-actions">
           <Button variant="secondary" onClick={handleDownload} disabled={isExporting}>
-            📥 이미지 저장
+            이미지 저장
           </Button>
           <Button variant="primary" onClick={handleShare} disabled={isExporting}>
-            📤 공유하기
+            공유하기
           </Button>
         </div>
       </div>

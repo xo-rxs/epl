@@ -125,7 +125,6 @@ function SchedulePage() {
       <Layout headerProps={headerProps}>
         <Container>
           <div className="schedule-empty">
-            <span className="schedule-empty__icon">📅</span>
             <h2 className="schedule-empty__title">로그인이 필요합니다</h2>
             <p className="schedule-empty__desc">
               내가 참여한 경기 일정을 확인하려면 먼저 로그인해주세요.
@@ -269,7 +268,7 @@ function SchedulePage() {
                     <div className="schedule-match-card__body">
                       <h4 className="schedule-match-card__title">{match.title}</h4>
                       <p className="schedule-match-card__meta">
-                        📍 {match.location} · 👥 {(match.participants || []).length}/
+                        {match.location} · {(match.participants || []).length}/
                         {match.maxParticipants}
                       </p>
                     </div>

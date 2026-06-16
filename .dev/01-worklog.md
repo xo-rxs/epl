@@ -18,6 +18,7 @@
 - 전 페이지 네비게이션에 '마이페이지' 추가
 - CSV 팀 분배: 팀 확정 시 참여자 CSV에 '팀' 컬럼 포함 (MatchActions)
 - 이미지 깨짐 수정: html2canvas allowTaint 제거 (캔버스 오염 → toBlob 실패 원인)
+- 실력 점수 객관화: 평가 화면을 실력/매너 이중 별점으로 분리(entries에 skillRating 추가), 보정 실력 점수 = (자기평가 + 동료 실력평가 합) ÷ (1 + 평가 수) (src/utils/skillScore.js 신규). 참여 신청 시 보정 점수가 skillScore로 들어가 Snake Draft 팀 배정이 객관화됨. 마이페이지에 실력/매너 평균·보정 점수 표시
 
 ### 미반영 (백로그)
 - 팀 채팅방: 서버/실시간 인프라 필요, LocalStorage 기반 현 구조로는 불가

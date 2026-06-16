@@ -17,41 +17,72 @@ const toAnonymousKey = (userId) => {
 
 const REVIEW_TAGS = {
   positive: [
-    { label: '매너가 좋아요', emoji: '👍' },
-    { label: '실력이 좋아요', emoji: '⭐' },
-    { label: '시간 약속을 잘 지켜요', emoji: '⏱️' },
-    { label: '소통이 잘 돼요', emoji: '💬' },
-    { label: '팀플레이가 좋아요', emoji: '🤝' },
-    { label: '분위기가 좋아요', emoji: '😄' },
+    { label: '매너가 좋아요' },
+    { label: '실력이 좋아요' },
+    { label: '시간 약속을 잘 지켜요' },
+    { label: '소통이 잘 돼요' },
+    { label: '팀플레이가 좋아요' },
+    { label: '분위기가 좋아요' },
   ],
   negative: [
-    { label: '매너가 별로에요', emoji: '😠' },
-    { label: '실력이 아쉬워요', emoji: '😕' },
-    { label: '시간 약속이 아쉬워요', emoji: '⏰' },
-    { label: '소통이 아쉬워요', emoji: '😶' },
-    { label: '팀플레이가 아쉬워요', emoji: '🙅' },
+    { label: '매너가 별로에요' },
+    { label: '실력이 아쉬워요' },
+    { label: '시간 약속이 아쉬워요' },
+    { label: '소통이 아쉬워요' },
+    { label: '팀플레이가 아쉬워요' },
   ],
 };
 
 const buildInitialEntries = (participants, existingEntries = []) => {
   const map = {};
   existingEntries.forEach((e) => {
-    map[e.participantId] = { rating: e.rating, tags: e.tags || [], touched: true };
+    map[e.participantId] = {
+      rating: e.rating || 0,
+      skillRating: e.skillRating || 0,
+      tags: e.tags || [],
+      touched: true,
+    };
   });
   participants.forEach((p) => {
-    if (!map[p.id]) map[p.id] = { rating: 0, tags: [], touched: false };
+    if (!map[p.id]) map[p.id] = { rating: 0, skillRating: 0, tags: [], touched: false };
   });
   return map;
 };
+
+// 실력·매너 모두 별점을 매겼는지 여부
+const isFullyRated = (entry) => entry?.rating > 0 && entry?.skillRating > 0;
+
+/* 별점 한 줄 (실력/매너 공용) */
+function StarRow({ label, value, onSelect }) {
+  return (
+    <div className="rv-rate-row">
+      <span className="rv-rate-label">{label}</span>
+      <div className="rv-stars" role="radiogroup" aria-label={label}>
+        {[1, 2, 3, 4, 5].map((score) => (
+          <button
+            key={score}
+            type="button"
+            className={`rv-star ${value >= score ? 'is-active' : ''}`}
+            aria-pressed={value === score}
+            onClick={() => onSelect(score)}
+          >
+            ★
+          </button>
+        ))}
+        {value > 0 && <span className="rv-star-label">{value}점</span>}
+      </div>
+    </div>
+  );
+}
 
 /* 개별 선수 평가 카드 */
 function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
   const [tagsOpen, setTagsOpen] = useState(false);
   const touched = entry.touched;
-  const rated = entry.rating > 0;
+  const rated = isFullyRated(entry);
 
-  const handleRate = (score) => {
-    onRate(participant.id, score);
+  const handleRate = (field, score) => {
+    onRate(participant.id, field, score);
     if (!tagsOpen) setTagsOpen(true);
   };
 
@@ -71,30 +102,25 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
         </div>
         {rated && (
           <div className="rv-card__done-badge">
-            {'★'.repeat(entry.rating)}
-            {'☆'.repeat(5 - entry.rating)}
+            실력 ★{entry.skillRating} · 매너 ★{entry.rating}
           </div>
         )}
       </div>
 
-      {/* 별점 */}
-      <div className="rv-stars" role="radiogroup" aria-label="평점">
-        {[1, 2, 3, 4, 5].map((score) => (
-          <button
-            key={score}
-            type="button"
-            className={`rv-star ${entry.rating >= score ? 'is-active' : ''}`}
-            aria-pressed={entry.rating === score}
-            onClick={() => handleRate(score)}
-          >
-            ★
-          </button>
-        ))}
-        {rated && <span className="rv-star-label">{entry.rating}점</span>}
-      </div>
+      {/* 실력 / 매너 별점 */}
+      <StarRow
+        label="실력"
+        value={entry.skillRating}
+        onSelect={(score) => handleRate('skillRating', score)}
+      />
+      <StarRow
+        label="매너"
+        value={entry.rating}
+        onSelect={(score) => handleRate('rating', score)}
+      />
 
       {/* 태그 (별점 선택 후 펼쳐짐) */}
-      {rated && (
+      {(entry.rating > 0 || entry.skillRating > 0) && (
         <div className="rv-tags-section">
           <button
             type="button"
@@ -108,7 +134,7 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
             <div className="rv-tags">
               <div className="rv-tags__group">
                 {REVIEW_TAGS.positive.map((tag) => {
-                  const key = `${tag.emoji} ${tag.label}`;
+                  const key = tag.label;
                   const active = entry.tags.includes(key);
                   return (
                     <button
@@ -117,14 +143,14 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
                       className={`rv-tag rv-tag--pos ${active ? 'is-active' : ''}`}
                       onClick={() => onToggleTag(participant.id, key)}
                     >
-                      {tag.emoji} {tag.label}
+                      {tag.label}
                     </button>
                   );
                 })}
               </div>
               <div className="rv-tags__group">
                 {REVIEW_TAGS.negative.map((tag) => {
-                  const key = `${tag.emoji} ${tag.label}`;
+                  const key = tag.label;
                   const active = entry.tags.includes(key);
                   return (
                     <button
@@ -133,7 +159,7 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
                       className={`rv-tag rv-tag--neg ${active ? 'is-active' : ''}`}
                       onClick={() => onToggleTag(participant.id, key)}
                     >
-                      {tag.emoji} {tag.label}
+                      {tag.label}
                     </button>
                   );
                 })}
@@ -182,21 +208,24 @@ function ReviewPage() {
   }, [approvedParticipants, selectedMatch, myReview]);
 
   const ratedCount = useMemo(
-    () => approvedParticipants.filter((p) => entries[p.id]?.rating > 0).length,
+    () => approvedParticipants.filter((p) => isFullyRated(entries[p.id])).length,
     [approvedParticipants, entries]
   );
 
-  /* 별점 선택 → 다음 미평가 선수로 자동 스크롤 */
-  const handleRate = useCallback((participantId, score) => {
+  /* 별점 선택 → 실력·매너 모두 매기면 다음 미평가 선수로 자동 스크롤 */
+  const handleRate = useCallback((participantId, field, score) => {
     setEntries((prev) => ({
       ...prev,
-      [participantId]: { ...prev[participantId], rating: score, touched: true },
+      [participantId]: { ...prev[participantId], [field]: score, touched: true },
     }));
 
-    // 다음 미평가 선수 찾기
+    // 이번 선택으로 실력·매너가 모두 채워졌을 때만 다음 선수로 이동
+    const updatedEntry = { ...entries[participantId], [field]: score };
+    if (!isFullyRated(updatedEntry)) return;
+
     const idx = approvedParticipants.findIndex((p) => p.id === participantId);
     const nextUnrated = approvedParticipants.slice(idx + 1).find(
-      (p) => !(entries[p.id]?.rating > 0)
+      (p) => !isFullyRated(entries[p.id])
     );
     if (nextUnrated) {
       setTimeout(() => {
@@ -221,19 +250,23 @@ function ReviewPage() {
   const handleSave = () => {
     if (!selectedMatch || !currentUser || !reviewerKey) return;
 
-    if (ratedCount === 0) {
+    const hasAnyRating = approvedParticipants.some(
+      (p) => entries[p.id]?.rating > 0 || entries[p.id]?.skillRating > 0
+    );
+    if (!hasAnyRating) {
       alert('최소 한 명 이상 별점을 매긴 후 저장할 수 있습니다.');
       return;
     }
 
     const reviewEntries = approvedParticipants.map((p) => {
-      const e = entries[p.id] || { rating: 0, tags: [] };
+      const e = entries[p.id] || { rating: 0, skillRating: 0, tags: [] };
       return {
         participantId: p.id,
         nickname: p.name || p.nickname,
         age: p.age,
         position: p.position,
         rating: Number(e.rating) || 0,
+        skillRating: Number(e.skillRating) || 0,
         tags: e.tags || [],
       };
     });
@@ -250,9 +283,9 @@ function ReviewPage() {
     // 첫 저장 시에만 포인트 적립 (평가 참여 혜택)
     if (isFirstSave) {
       addReviewPoints(currentUser.id, REVIEW_REWARD_POINTS);
-      setSavedMsg(`평가가 익명으로 저장되었습니다! ✅ +${REVIEW_REWARD_POINTS}P 적립`);
+      setSavedMsg(`평가가 익명으로 저장되었습니다. +${REVIEW_REWARD_POINTS}P 적립`);
     } else {
-      setSavedMsg('평가가 익명으로 수정 저장되었습니다! ✅');
+      setSavedMsg('평가가 익명으로 수정 저장되었습니다.');
     }
     setTimeout(() => setSavedMsg(''), 5000);
   };
@@ -277,7 +310,6 @@ function ReviewPage() {
       <Layout headerProps={headerProps}>
         <Container>
           <div className="rv-empty">
-            <span>🔐</span>
             <p>
               평가는 로그인 후 참여할 수 있습니다.
               <br />
@@ -305,8 +337,10 @@ function ReviewPage() {
           <div>
             <h2 className="rv-page-title">경기 평가</h2>
             <p className="rv-page-desc">
-              함께한 모든 참여자가 서로를 평가할 수 있습니다. 평가는 <strong>선택사항</strong>이며{' '}
-              <strong>익명</strong>으로 저장됩니다. 평가 완료 시 {REVIEW_REWARD_POINTS}P가 적립돼요.
+              선수마다 <strong>실력</strong>과 <strong>매너</strong>를 따로 평가합니다. 받은 실력 평가는
+              자기평가와 합산되어 <strong>스킬 티어</strong>와 팀 배정 점수가 객관적으로 보정돼요.
+              평가는 <strong>선택사항</strong>이며 <strong>익명</strong>으로 저장되고, 완료 시{' '}
+              {REVIEW_REWARD_POINTS}P가 적립됩니다.
             </p>
           </div>
         </div>
@@ -328,7 +362,6 @@ function ReviewPage() {
 
         {matches.length === 0 ? (
           <div className="rv-empty">
-            <span>📋</span>
             <p>먼저 경기를 생성하고 참여자를 승인해주세요.</p>
           </div>
         ) : (
@@ -394,7 +427,7 @@ function ReviewPage() {
                   <span className="rv-save-bar__hint">
                     {ratedCount < approvedParticipants.length
                       ? `${approvedParticipants.length - ratedCount}명 평가 남음`
-                      : '모든 선수 평가 완료 🎉'}
+                      : '모든 선수 평가 완료'}
                   </span>
                   <Button variant="primary" onClick={handleSave}>
                     {ratedCount === approvedParticipants.length ? '평가 완료' : '임시 저장'}
@@ -405,7 +438,6 @@ function ReviewPage() {
 
             {selectedMatch && approvedParticipants.length === 0 && (
               <div className="rv-empty">
-                <span>👥</span>
                 <p>평가할 수 있는 참여자가 없습니다. (본인은 평가 대상에서 제외됩니다)</p>
               </div>
             )}

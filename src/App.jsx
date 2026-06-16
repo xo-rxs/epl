@@ -87,7 +87,7 @@ function App() {
 
     const features = [
       {
-        icon: '📝',
+        icon: '매치',
         title: '매치 모집',
         desc: '경기 정보를 입력하면 참여 폼이 자동 생성됩니다. 링크 공유만으로 실시간 참여 현황을 확인하세요.',
         color: '#2ecc71',
@@ -95,7 +95,7 @@ function App() {
         url: '/?page=match',
       },
       {
-        icon: '🤖',
+        icon: '팀배정',
         title: '자동 팀 배정',
         desc: 'Snake Draft 알고리즘이 실력·학년을 균형 있게 고려해 공정한 팀을 자동으로 구성합니다.',
         color: '#3498db',
@@ -103,7 +103,7 @@ function App() {
         url: '/?page=teams',
       },
       {
-        icon: '🎯',
+        icon: '전술',
         title: '전술 배치도',
         desc: '팀원 아이콘을 드래그해 포지션을 배치하고, PNG 이미지로 저장해 바로 공유하세요.',
         color: '#9b59b6',
@@ -111,7 +111,7 @@ function App() {
         url: '/?page=teams',
       },
       {
-        icon: '⭐',
+        icon: '리뷰',
         title: '별점 리뷰',
         desc: '경기 후 상호 평가로 신뢰도 기반 커뮤니티를 만들어 갑니다. 레이더 차트로 성장을 확인하세요.',
         color: '#f39c12',
@@ -130,7 +130,7 @@ function App() {
       <Layout headerProps={headerProps}>
         {/* 히어로 섹션 */}
         <section className="home-hero">
-          <div className="home-hero__badge">⚽ Easy Pick League</div>
+          <div className="home-hero__badge">Easy Pick League</div>
           <h1 className="home-hero__title">
             아마추어 축구,<br />
             <span className="home-hero__accent">스마트하게</span> 운영하세요

@@ -36,7 +36,7 @@ function TeamPage() {
       },
     });
 
-    setSavedMsg('팀 구성이 저장되었습니다! ✅');
+    setSavedMsg('팀 구성이 저장되었습니다.');
     setTimeout(() => setSavedMsg(''), 3000);
   };
 
@@ -71,7 +71,6 @@ function TeamPage() {
 
         {matches.length === 0 ? (
           <div className="team-page-empty">
-            <span>⚽</span>
             <p>먼저 경기와 참여자를 등록해주세요.</p>
             <a href="/?page=match">경기 만들러 가기 →</a>
           </div>
@@ -96,8 +95,8 @@ function TeamPage() {
               </div>
               {selectedMatch && (
                 <div className="team-page-match-meta">
-                  <span>📍 {selectedMatch.location}</span>
-                  <span>👥 {approvedParticipants.length}명 참가</span>
+                  <span>장소 · {selectedMatch.location}</span>
+                  <span>{approvedParticipants.length}명 참가</span>
                   {selectedMatch.teamAssignment && (
                     <span className="team-page-match-badge">팀 확정됨</span>
                   )}
@@ -120,7 +119,6 @@ function TeamPage() {
                 <TacticsBoard match={selectedMatch} />
               ) : (
                 <div className="team-page-tactics-locked">
-                  <span>🧩</span>
                   <p>팀 구성을 확정하면 전술 배치도를 사용할 수 있습니다.</p>
                 </div>
               )

@@ -417,15 +417,12 @@
   position: absolute;
   z-index: 2;
   left: 50%;
-  display: grid;
-  width: 44px;
-  height: 44px;
-  place-items: center;
-  border: 2px solid var(--color-white);
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--color-white);
   border-radius: var(--radius-full);
   background-color: var(--color-primary);
   box-shadow: var(--shadow-md);
-  font-size: 24px;
   transform: translate(-50%, -50%);
   transition: top var(--transition-fast);
   pointer-events: none;
@@ -551,7 +548,7 @@
 /* ── 마이페이지: 받은 평가 요약 ── */
 .auth-review-summary {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: var(--spacing-3);
   margin-bottom: var(--spacing-4);
 }
@@ -604,4 +601,12 @@
   background: var(--color-gray-50);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
+}
+
+/* ── 마이페이지: 티어 보정 안내 ── */
+.auth-tier-card .auth-tier-card__note {
+  padding-top: var(--spacing-2);
+  border-top: 1px dashed var(--color-gray-200);
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-500);
 }
