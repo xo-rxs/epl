@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Layout, Container, Input, Button } from '../components';
 import { useAuthData, useMatchData } from '../hooks';
 import { getReviewPoints } from '../utils/reviewPoints';
-import { getObjectiveSkillScore, getPeerSkillStats } from '../utils/skillScore';
+import { getPeerSkillStats, getTierValueFromScore } from '../utils/skillScore';
 import '../styles/AuthPage.css';
 
 const INITIAL_FORM = {
@@ -10,7 +10,7 @@ const INITIAL_FORM = {
   name: '',
   age: '',
   preferredPosition: 'MF',
-  skillTier: 'HIKER',
+  skillTier: '',
   password: '',
   passwordConfirm: '',
 };
@@ -65,11 +65,6 @@ const SKILL_TIERS = [
   },
 ];
 
-const getTierIndexFromY = (clientY, element) => {
-  const rect = element.getBoundingClientRect();
-  const ratio = Math.min(Math.max((clientY - rect.top) / rect.height, 0), 0.999);
-  return Math.floor(ratio * SKILL_TIERS.length);
-};
 
 const SkillMountain = ({ selectedValue, interactive = false, onSelect }) => {
   const selectedIndex = Math.max(
@@ -101,9 +96,7 @@ const SkillMountain = ({ selectedValue, interactive = false, onSelect }) => {
           </button>
         );
       })}
-      <div className="auth-goat" style={{ top: goatTop }} aria-hidden="true">
-        🐐
-      </div>
+      <div className="auth-goat" style={{ top: goatTop }} aria-hidden="true" />
     </div>
   );
 };
@@ -133,15 +126,12 @@ function AuthPage() {
   const { currentUser, login, signUp, logout, updateProfile } = useAuthData();
   const { matches } = useMatchData();
   const [mode, setMode] = useState('login');
-  const [step, setStep] = useState(0); // 회원가입 단계 (0: 기본정보, 1: 스킬티어)
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [message, setMessage] = useState({ text: '', isError: false });
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editProfile, setEditProfile] = useState({ preferredPosition: 'MF', skillTier: 'HIKER' });
-  const mountainRef = useRef(null);
 
   const isLogin = mode === 'login';
-  const selectedTier = SKILL_TIERS.find((t) => t.value === formData.skillTier);
   const currentUserTier = SKILL_TIERS.find((t) => t.value === currentUser?.skillTier);
 
   // 내가 받은 익명 평가 요약 (실력·매너 평균, 받은 평가 수, 자주 받은 태그)
@@ -191,16 +181,15 @@ function AuthPage() {
 
   const reviewPoints = currentUser ? getReviewPoints(currentUser.id) : 0;
 
-  // 보정 실력 점수 (자기평가 + 동료 실력 평가 합산) — 팀 배정에 사용되는 값
-  const selfSkillScore = currentUserTier
-    ? 5 - SKILL_TIERS.findIndex((t) => t.value === currentUserTier.value)
-    : 3;
   const peerSkillStats = currentUser
     ? getPeerSkillStats(matches, currentUser.id)
     : { count: 0, avg: 0 };
-  const objectiveSkillScore = currentUser
-    ? getObjectiveSkillScore(selfSkillScore, matches, currentUser.id)
-    : selfSkillScore;
+
+  // 동료 평가가 있으면 동료 평균 별점을 티어로 환산해 표시, 없으면 자기평가 티어
+  const isTierAdjusted = peerSkillStats.count > 0;
+  const displayTier = isTierAdjusted
+    ? SKILL_TIERS.find((t) => t.value === getTierValueFromScore(peerSkillStats.avg))
+    : currentUserTier;
 
   const handleStartEditProfile = () => {
     setEditProfile({
@@ -220,7 +209,7 @@ function AuthPage() {
     }
 
     setIsEditingProfile(false);
-    setMessage({ text: '프로필이 수정되었습니다! ✅', isError: false });
+    setMessage({ text: '프로필이 수정되었습니다.', isError: false });
   };
 
   const handleChange = (event) => {
@@ -231,12 +220,10 @@ function AuthPage() {
 
   const handleModeChange = (nextMode) => {
     setMode(nextMode);
-    setStep(0);
     setFormData(INITIAL_FORM);
     setMessage({ text: '', isError: false });
   };
 
-  /* Step 1 → Step 2 전환 시 유효성 검사 */
   const handleNextStep = (event) => {
     event.preventDefault();
 
@@ -253,25 +240,12 @@ function AuthPage() {
       return;
     }
 
-    setMessage({ text: '', isError: false });
-    setStep(1);
-  };
-
-  const selectTierByPointer = (clientY) => {
-    if (!mountainRef.current) return;
-    const tierIndex = getTierIndexFromY(clientY, mountainRef.current);
-    setFormData((prev) => ({ ...prev, skillTier: SKILL_TIERS[tierIndex].value }));
-  };
-
-  const handleMountainPointerDown = (event) => {
-    selectTierByPointer(event.clientY);
-    const onMove = (e) => selectTierByPointer(e.clientY);
-    const onUp = () => {
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-    };
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
+    const result = signUp(formData);
+    if (!result.ok) {
+      setMessage({ text: result.message, isError: true });
+      return;
+    }
+    setMessage({ text: '회원가입이 완료되었습니다.', isError: false });
   };
 
   const handleSubmit = (event) => {
@@ -285,7 +259,7 @@ function AuthPage() {
     }
 
     setMessage({
-      text: isLogin ? '로그인되었습니다.' : '회원가입이 완료되었습니다! 🎉',
+      text: isLogin ? '로그인되었습니다.' : '회원가입이 완료되었습니다.',
       isError: false,
     });
   };
@@ -332,7 +306,12 @@ function AuthPage() {
                     ['이메일', currentUser.email],
                     ['나이', currentUser.age ? `${currentUser.age}세` : '미입력'],
                     ['선호 포지션', currentUser.preferredPosition || '미입력'],
-                    ['스킬 티어', currentUserTier ? `${currentUserTier.label} · ${currentUserTier.range}` : '미입력'],
+                    [
+                      '스킬 티어',
+                      displayTier
+                        ? `${displayTier.label} · ${displayTier.range}${isTierAdjusted ? ' (동료 평가 보정)' : ''}`
+                        : '언랭',
+                    ],
                   ].map(([dt, dd]) => (
                     <div key={dt}>
                       <dt>{dt}</dt>
@@ -349,9 +328,11 @@ function AuthPage() {
                   </div>
                   <div className="auth-review-stat">
                     <span className="auth-review-stat__value">
-                      {reviewSummary?.skillCount > 0 ? `★ ${reviewSummary.avgSkill.toFixed(1)}` : '-'}
+                      {reviewSummary?.skillCount > 0
+                        ? SKILL_TIERS.find((t) => t.value === getTierValueFromScore(reviewSummary.avgSkill))?.label || '-'
+                        : '-'}
                     </span>
-                    <span className="auth-review-stat__label">실력 평균</span>
+                    <span className="auth-review-stat__label">동료 평가 티어</span>
                   </div>
                   <div className="auth-review-stat">
                     <span className="auth-review-stat__value">
@@ -365,17 +346,6 @@ function AuthPage() {
                   </div>
                 </div>
 
-                {/* 보정 실력 점수 (팀 배정에 사용) */}
-                <div className="auth-objective-skill">
-                  <div>
-                    <strong>보정 실력 점수 {objectiveSkillScore}</strong>
-                    <span>
-                      {peerSkillStats.count > 0
-                        ? `자기평가 ${selfSkillScore} + 동료 실력 평가 ${peerSkillStats.count}회 합산 · 팀 배정에 사용됩니다.`
-                        : `아직 동료 실력 평가가 없어 자기평가(${selfSkillScore})가 그대로 사용됩니다.`}
-                    </span>
-                  </div>
-                </div>
                 {reviewSummary?.topTags.length > 0 && (
                   <div className="auth-review-tags">
                     {reviewSummary.topTags.map(([tag, count]) => (
@@ -425,12 +395,12 @@ function AuthPage() {
                     </div>
                   </div>
                 ) : (
-                  currentUserTier && (
+                  displayTier && (
                     <>
-                      <SkillMountain selectedValue={currentUser.skillTier} />
-                      <div className="auth-tier-card" style={{ borderColor: currentUserTier.color + '60', background: currentUserTier.color + '0e' }}>
-                        <strong style={{ color: currentUserTier.color }}>{currentUserTier.label}</strong>
-                        <span>{currentUserTier.description}</span>
+                      <SkillMountain selectedValue={displayTier.value} />
+                      <div className="auth-tier-card" style={{ borderColor: displayTier.color + '60', background: displayTier.color + '0e' }}>
+                        <strong style={{ color: displayTier.color }}>{displayTier.label}</strong>
+                        <span>{displayTier.description}</span>
                       </div>
                     </>
                   )
@@ -445,7 +415,7 @@ function AuthPage() {
                 <div className="auth-actions">
                   {!isEditingProfile && (
                     <Button variant="primary" onClick={handleStartEditProfile}>
-                      ✏️ 프로필 수정
+                      프로필 수정
                     </Button>
                   )}
                   <Button
@@ -490,112 +460,62 @@ function AuthPage() {
                   </p>
                 </form>
               ) : (
-                <>
-                  {/* 회원가입 진행 표시 */}
-                  <StepIndicator current={step} total={2} />
-
-                  {/* Step 1: 기본 정보 */}
-                  {step === 0 && (
-                    <form className="auth-form" onSubmit={handleNextStep}>
-                      <div className="auth-form-section">
-                        <p className="auth-form-section__label">계정 정보</p>
-                        <Input label="이메일" type="email" name="email" placeholder="epl@example.com" value={formData.email} onChange={handleChange} required />
-                        <div className="auth-pw-wrap">
-                          <Input label="비밀번호" type="password" name="password" placeholder="6자 이상" value={formData.password} onChange={handleChange} required />
-                          {pwStrength && (
-                            <div className="auth-pw-strength">
-                              {[1, 2, 3].map((n) => (
-                                <div
-                                  key={n}
-                                  className="auth-pw-strength__bar"
-                                  style={{
-                                    background: n <= pwStrength.level
-                                      ? pwStrength.level === 1 ? '#e74c3c' : pwStrength.level === 2 ? '#f39c12' : '#2ecc71'
-                                      : '#e9ecef',
-                                  }}
-                                />
-                              ))}
-                              <span className="auth-pw-strength__label">{pwStrength.label}</span>
-                            </div>
-                          )}
+                <form className="auth-form" onSubmit={handleNextStep}>
+                  <div className="auth-form-section">
+                    <p className="auth-form-section__label">계정 정보</p>
+                    <Input label="이메일" type="email" name="email" placeholder="epl@example.com" value={formData.email} onChange={handleChange} required />
+                    <div className="auth-pw-wrap">
+                      <Input label="비밀번호" type="password" name="password" placeholder="6자 이상" value={formData.password} onChange={handleChange} required />
+                      {pwStrength && (
+                        <div className="auth-pw-strength">
+                          {[1, 2, 3].map((n) => (
+                            <div
+                              key={n}
+                              className="auth-pw-strength__bar"
+                              style={{
+                                background: n <= pwStrength.level
+                                  ? pwStrength.level === 1 ? '#e74c3c' : pwStrength.level === 2 ? '#f39c12' : '#2ecc71'
+                                  : '#e9ecef',
+                              }}
+                            />
+                          ))}
+                          <span className="auth-pw-strength__label">{pwStrength.label}</span>
                         </div>
-                        <Input label="비밀번호 확인" type="password" name="passwordConfirm" placeholder="비밀번호 재입력" value={formData.passwordConfirm} onChange={handleChange} required />
-                      </div>
-
-                      <div className="auth-form-section">
-                        <p className="auth-form-section__label">프로필</p>
-                        <div className="auth-row">
-                          <Input label="이름" name="name" placeholder="홍길동" value={formData.name} onChange={handleChange} required />
-                          <Input label="나이" type="number" name="age" placeholder="24" value={formData.age} onChange={handleChange} min="8" max="80" required />
-                        </div>
-
-                        <div className="auth-field">
-                          <label>선호 포지션 <span className="auth-required">*</span></label>
-                          <div className="auth-position-grid">
-                            {POSITION_OPTIONS.map((pos) => (
-                              <button
-                                key={pos.value}
-                                type="button"
-                                className={`auth-position-btn ${formData.preferredPosition === pos.value ? 'is-active' : ''}`}
-                                onClick={() => setFormData((prev) => ({ ...prev, preferredPosition: pos.value }))}
-                              >
-                                <span className="auth-position-btn__label">{pos.label}</span>
-                                <span className="auth-position-btn__desc">{pos.desc}</span>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      {message.text && (
-                        <p className={`auth-message ${message.isError ? 'is-error' : 'is-success'}`}>{message.text}</p>
                       )}
-                      <Button type="submit" fullWidth>다음 단계 →</Button>
-                    </form>
-                  )}
+                    </div>
+                    <Input label="비밀번호 확인" type="password" name="passwordConfirm" placeholder="비밀번호 재입력" value={formData.passwordConfirm} onChange={handleChange} required />
+                  </div>
 
-                  {/* Step 2: 스킬 티어 */}
-                  {step === 1 && (
-                    <form className="auth-form" onSubmit={handleSubmit}>
-                      <div className="auth-tier-step">
-                        <p className="auth-tier-step__guide">
-                          클릭하거나 드래그해서 내 실력에 맞는 티어를 선택하세요.
-                        </p>
-                        <div ref={mountainRef} onPointerDown={handleMountainPointerDown}>
-                          <SkillMountain
-                            selectedValue={formData.skillTier}
-                            interactive
-                            onSelect={(value) => setFormData((prev) => ({ ...prev, skillTier: value }))}
-                          />
-                        </div>
-                        {selectedTier && (
-                          <div className="auth-tier-selected" style={{ borderColor: selectedTier.color, background: selectedTier.color + '12' }}>
-                            <div className="auth-tier-selected__top">
-                              <strong style={{ color: selectedTier.color }}>{selectedTier.label}</strong>
-                              <span className="auth-tier-selected__range">{selectedTier.range}</span>
-                            </div>
-                            <p className="auth-tier-selected__desc">{selectedTier.description}</p>
-                          </div>
-                        )}
+                  <div className="auth-form-section">
+                    <p className="auth-form-section__label">프로필</p>
+                    <div className="auth-row">
+                      <Input label="이름" name="name" placeholder="홍길동" value={formData.name} onChange={handleChange} required />
+                      <Input label="나이" type="number" name="age" placeholder="24" value={formData.age} onChange={handleChange} min="8" max="80" required />
+                    </div>
+
+                    <div className="auth-field">
+                      <label>선호 포지션 <span className="auth-required">*</span></label>
+                      <div className="auth-position-grid">
+                        {POSITION_OPTIONS.map((pos) => (
+                          <button
+                            key={pos.value}
+                            type="button"
+                            className={`auth-position-btn ${formData.preferredPosition === pos.value ? 'is-active' : ''}`}
+                            onClick={() => setFormData((prev) => ({ ...prev, preferredPosition: pos.value }))}
+                          >
+                            <span className="auth-position-btn__label">{pos.label}</span>
+                            <span className="auth-position-btn__desc">{pos.desc}</span>
+                          </button>
+                        ))}
                       </div>
+                    </div>
+                  </div>
 
-                      {message.text && (
-                        <p className={`auth-message ${message.isError ? 'is-error' : 'is-success'}`}>{message.text}</p>
-                      )}
-
-                      <div className="auth-step-nav">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          onClick={() => { setStep(0); setMessage({ text: '', isError: false }); }}
-                        >
-                          ← 이전
-                        </Button>
-                        <Button type="submit">가입 완료</Button>
-                      </div>
-                    </form>
+                  {message.text && (
+                    <p className={`auth-message ${message.isError ? 'is-error' : 'is-success'}`}>{message.text}</p>
                   )}
-                </>
+                  <Button type="submit" fullWidth>가입 완료</Button>
+                </form>
               )}
             </div>
           )}

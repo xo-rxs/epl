@@ -59,7 +59,7 @@ function MatchForm({ onSubmit, loading = false }) {
 
   return (
     <Card
-      header={<h3 className="card-header-title">📅 새 경기 생성</h3>}
+      header={<h3 className="card-header-title">새 경기 생성</h3>}
       footer={
         <div style={{ display: 'flex', gap: 'var(--spacing-2)', justifyContent: 'flex-end', width: '100%' }}>
           <Button
@@ -189,7 +189,7 @@ function MatchForm({ onSubmit, loading = false }) {
             style={{ marginTop: '3px' }}
           />
           <span>
-            <strong style={{ fontSize: 'var(--font-size-sm)' }}>🔒 비공개 경기</strong>
+            <strong style={{ fontSize: 'var(--font-size-sm)' }}>비공개 경기</strong>
             <span
               style={{
                 display: 'block',

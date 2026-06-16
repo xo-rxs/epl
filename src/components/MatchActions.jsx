@@ -51,7 +51,7 @@ function MatchActions({ match, onStatusChange, onDelete }) {
 
   return (
     <Card
-      header={<h3 className="card-header-title">⚙️ 경기 관리</h3>}
+      header={<h3 className="card-header-title">경기 관리</h3>}
     >
       <div style={{
         display: 'grid',
@@ -64,7 +64,7 @@ function MatchActions({ match, onStatusChange, onDelete }) {
           onClick={handleCopyLink}
           fullWidth
         >
-          📋 링크 복사
+          링크 복사
         </Button>
 
         <Button
@@ -74,7 +74,7 @@ function MatchActions({ match, onStatusChange, onDelete }) {
           disabled={match.participants.length === 0}
           fullWidth
         >
-          📥 CSV 내보내기
+          CSV 내보내기
         </Button>
 
         {onStatusChange && match.status === 'recruiting' && (
@@ -84,7 +84,7 @@ function MatchActions({ match, onStatusChange, onDelete }) {
             onClick={() => onStatusChange('closed')}
             fullWidth
           >
-            🔒 모집 마감
+            모집 마감
           </Button>
         )}
 
@@ -95,7 +95,7 @@ function MatchActions({ match, onStatusChange, onDelete }) {
             onClick={() => onStatusChange('recruiting')}
             fullWidth
           >
-            🔓 모집 재개
+            모집 재개
           </Button>
         )}
 
@@ -106,7 +106,7 @@ function MatchActions({ match, onStatusChange, onDelete }) {
             onClick={() => onStatusChange('ready')}
             fullWidth
           >
-            ✅ 준비 완료
+            준비 완료
           </Button>
         )}
 
@@ -121,7 +121,7 @@ function MatchActions({ match, onStatusChange, onDelete }) {
             }}
             fullWidth
           >
-            🗑️ 경기 삭제
+            경기 삭제
           </Button>
         )}
       </div>
@@ -137,7 +137,7 @@ function MatchActions({ match, onStatusChange, onDelete }) {
         <strong>경기 ID:</strong> {match.id}
         <br />
         <strong>상태:</strong> {MATCH_STATUS_LABEL[match.status] || match.status}
-        {match.isPrivate && ' · 🔒 비공개'}
+        {match.isPrivate && ' · 비공개'}
         <br />
         <strong>생성:</strong> {new Date(match.createdAt).toLocaleString('ko-KR')}
       </div>

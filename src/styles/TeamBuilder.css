@@ -69,10 +69,7 @@
 
 .tb-slider-value {
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary-dark);
-  background: rgba(46, 204, 113, 0.1);
-  padding: 2px var(--spacing-2);
-  border-radius: var(--radius-full);
+  color: var(--color-gray-700);
   font-size: var(--font-size-xs);
 }
 
@@ -85,11 +82,7 @@
 
 .tb-saved-at {
   font-size: var(--font-size-sm);
-  color: var(--color-primary-dark);
-  background: rgba(46, 204, 113, 0.08);
-  border: 1px solid rgba(46, 204, 113, 0.2);
-  border-radius: var(--radius-base);
-  padding: var(--spacing-2) var(--spacing-4);
+  color: var(--color-gray-500);
 }
 
 /* ── 밸런스 지표 ── */
@@ -146,13 +139,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-.tb-team-a {
-  border-top: 3px solid #3498db;
-}
-
-.tb-team-b {
-  border-top: 3px solid #e74c3c;
-}
 
 .tb-team-header {
   display: flex;
@@ -163,12 +149,6 @@
   background: var(--color-gray-50);
 }
 
-.tb-team-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-full);
-  flex-shrink: 0;
-}
 
 .tb-team-header h3 {
   font-size: var(--font-size-base);
@@ -247,10 +227,13 @@
 
 .tb-position-badge {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
   flex-shrink: 0;
+  background: var(--color-gray-100);
+  color: var(--color-gray-600);
+  letter-spacing: 0.02em;
 }
 
 /* ── 실력 점수 dots ── */

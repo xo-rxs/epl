@@ -1,7 +1,7 @@
 import Button from './Button';
 import Card from './Card';
 import { useMatchData } from '../hooks';
-import { getObjectiveSkillScore, getPeerSkillStats } from '../utils/skillScore';
+import { getObjectiveSkillScore, getPeerSkillStats, getTierValueFromScore } from '../utils/skillScore';
 
 const SKILL_TIER_SCORE = {
   THE_GOAT: 5,
@@ -47,7 +47,10 @@ function ParticipantForm({
   const skillScore = currentUser
     ? getObjectiveSkillScore(selfSkillScore, matches, currentUser.id)
     : selfSkillScore;
-  const skillTierLabel = SKILL_TIER_LABEL[currentUser?.skillTier] || '미입력';
+  // 동료 평가로 보정된 점수를 환산한 티어를 표시 (평가 없으면 자기평가 티어)
+  const displayTierValue =
+    peerStats.count > 0 ? getTierValueFromScore(skillScore) : currentUser?.skillTier;
+  const skillTierLabel = SKILL_TIER_LABEL[displayTierValue] || '미입력';
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -76,7 +79,7 @@ function ParticipantForm({
 
   return (
     <Card
-      header={<h3 className="card-header-title">👤 참여 신청</h3>}
+      header={<h3 className="card-header-title">참여 신청</h3>}
       footer={
         <div style={{ display: 'flex', gap: 'var(--spacing-2)', justifyContent: 'space-between', width: '100%' }}>
           <span style={{ color: 'var(--color-gray-600)', fontSize: 'var(--font-size-sm)' }}>
@@ -166,7 +169,7 @@ function ParticipantForm({
           color: 'var(--color-error)',
           fontSize: 'var(--font-size-sm)',
         }}>
-          ⚠️ 모집이 마감되었습니다. {currentCount >= maxCount ? '참가 인원이 모두 찼습니다.' : '주최자가 모집을 마감했습니다.'}
+          모집이 마감되었습니다. {currentCount >= maxCount ? '참가 인원이 모두 찼습니다.' : '주최자가 모집을 마감했습니다.'}
         </div>
       )}
     </Card>

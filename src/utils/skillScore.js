@@ -58,3 +58,22 @@ export const getObjectiveSkillScore = (selfScore, matches, userId) => {
 
   return Math.round(((selfScore + avg * count) / (count + 1)) * 10) / 10;
 };
+
+// 점수(1~5) → 스킬 티어 값 매핑
+const TIER_BY_SCORE = {
+  1: 'VALLEY',
+  2: 'HIKER',
+  3: 'PEAK',
+  4: 'ALPINE',
+  5: 'THE_GOAT',
+};
+
+/**
+ * 보정 점수를 스킬 티어 값으로 환산 (반올림, 1~5로 클램프)
+ * @param {number} score - 실력 점수 (1~5, 소수 허용)
+ * @returns {string} 스킬 티어 값 (예: 'ALPINE')
+ */
+export const getTierValueFromScore = (score) => {
+  const rounded = Math.min(5, Math.max(1, Math.round(score)));
+  return TIER_BY_SCORE[rounded];
+};

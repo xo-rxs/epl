@@ -4,12 +4,6 @@ import { buildBalancedTeams } from '../utils/snakeDraft';
 import { exportToCSV, generateFilename } from '../utils/csvExport';
 import '../styles/TeamBuilder.css';
 
-const POSITION_COLOR = {
-  GK: { bg: '#fff3cd', color: '#856404' },
-  DF: { bg: '#cfe2ff', color: '#084298' },
-  MF: { bg: '#d1e7dd', color: '#0a3622' },
-  FW: { bg: '#f8d7da', color: '#842029' },
-};
 
 const SkillDots = ({ score, max = 5 }) => (
   <div className="tb-skill-dots">
@@ -20,29 +14,16 @@ const SkillDots = ({ score, max = 5 }) => (
   </div>
 );
 
-const PlayerRow = ({ player, rank }) => {
-  const posStyle = POSITION_COLOR[player.position] || { bg: '#e9ecef', color: '#495057' };
-  return (
-    <li className="tb-player-row">
-      <span className="tb-player-rank">{rank}</span>
-      <div className="tb-player-info">
-        <span className="tb-player-name">{player.name || player.nickname}</span>
-        <span className="tb-player-age">{player.age}세</span>
-      </div>
-      <span className="tb-position-badge" style={{ background: posStyle.bg, color: posStyle.color }}>
-        {player.position}
-      </span>
-      <SkillDots score={player.skillScore} />
-    </li>
-  );
-};
-
-const StatCard = ({ label, value, sub, accent }) => (
-  <div className="tb-stat-card">
-    <span className="tb-stat-value" style={accent ? { color: accent } : {}}>{value}</span>
-    <span className="tb-stat-label">{label}</span>
-    {sub && <span className="tb-stat-sub">{sub}</span>}
-  </div>
+const PlayerRow = ({ player, rank }) => (
+  <li className="tb-player-row">
+    <span className="tb-player-rank">{rank}</span>
+    <div className="tb-player-info">
+      <span className="tb-player-name">{player.name || player.nickname}</span>
+      <span className="tb-player-age">{player.age}세</span>
+    </div>
+    <span className="tb-position-badge">{player.position}</span>
+    <SkillDots score={player.skillScore} />
+  </li>
 );
 
 /**
@@ -91,7 +72,6 @@ function TeamBuilder({ participants = [], onConfirmTeams, confirmedAt }) {
   if (participants.length < 2) {
     return (
       <div className="tb-empty">
-        <span>👥</span>
         <p>최소 2명 이상 참가해야 팀 배정이 가능합니다.</p>
       </div>
     );
@@ -103,21 +83,21 @@ function TeamBuilder({ participants = [], onConfirmTeams, confirmedAt }) {
       <div className="tb-control-card">
         <div className="tb-control-header">
           <div>
-            <h3 className="tb-control-title">🤖 Snake Draft 팀 빌딩</h3>
+            <h3 className="tb-control-title">Snake Draft 팀 빌딩</h3>
             <p className="tb-control-desc">실력과 나이 균형을 맞춰 팀을 자동 배정합니다.</p>
           </div>
           <div className="tb-control-actions">
             <Button variant="primary" onClick={() => setRefreshSeed((v) => v + 1)}>
-              🔄 재배정
+              재배정
             </Button>
             {result && onConfirmTeams && (
               <Button variant="secondary" onClick={() => onConfirmTeams(result)}>
-                ✅ 팀 구성 확정
+                팀 구성 확정
               </Button>
             )}
             {result && (
               <Button variant="secondary" onClick={handleExportTeamsCSV}>
-                📥 팀 CSV 내보내기
+                팀 CSV 내보내기
               </Button>
             )}
           </div>
@@ -158,31 +138,17 @@ function TeamBuilder({ participants = [], onConfirmTeams, confirmedAt }) {
 
         {confirmedAt && (
           <p className="tb-saved-at">
-            ✅ 마지막 저장: {new Date(confirmedAt).toLocaleString('ko-KR')}
+            마지막 저장: {new Date(confirmedAt).toLocaleString('ko-KR')}
           </p>
         )}
       </div>
 
       {result && (
         <>
-          {/* 밸런스 지표 */}
-          <div className="tb-metrics">
-            <StatCard label="밸런스 점수" value={result.metrics.score.toFixed(2)} />
-            <StatCard
-              label="실력 차이"
-              value={result.metrics.skillDiff.toFixed(2)}
-              accent={result.metrics.skillDiff < 1 ? '#2ecc71' : result.metrics.skillDiff < 2 ? '#f39c12' : '#e74c3c'}
-            />
-            <StatCard label="팀 A 평균 나이" value={`${result.metrics.avgYearA.toFixed(1)}세`} />
-            <StatCard label="팀 B 평균 나이" value={`${result.metrics.avgYearB.toFixed(1)}세`} />
-            <StatCard label="나이 페널티" value={result.metrics.yearPenalty.toFixed(2)} />
-          </div>
-
           {/* 팀 카드 */}
           <div className="team-builder-grid">
             <div className="tb-team-card tb-team-a">
               <div className="tb-team-header">
-                <span className="tb-team-dot" style={{ background: '#3498db' }} />
                 <h3>팀 A</h3>
                 <span className="tb-team-count">{result.teamA.length}명</span>
                 <span className="tb-team-avg">
@@ -198,7 +164,6 @@ function TeamBuilder({ participants = [], onConfirmTeams, confirmedAt }) {
 
             <div className="tb-team-card tb-team-b">
               <div className="tb-team-header">
-                <span className="tb-team-dot" style={{ background: '#e74c3c' }} />
                 <h3>팀 B</h3>
                 <span className="tb-team-count">{result.teamB.length}명</span>
                 <span className="tb-team-avg">

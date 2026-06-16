@@ -310,10 +310,10 @@ function MatchPage() {
                     {currentMatch.title}
                   </h3>
                   <p style={{ fontSize: 'var(--font-size-base)', marginBottom: 'var(--spacing-3)' }}>
-                    📍 {currentMatch.location}
+                    장소 · {currentMatch.location}
                   </p>
                   <p style={{ fontSize: 'var(--font-size-base)' }}>
-                    🕐 {new Date(currentMatch.datetime).toLocaleString('ko-KR')}
+                    일시 · {new Date(currentMatch.datetime).toLocaleString('ko-KR')}
                   </p>
                   {currentMatch.description && (
                     <p style={{ fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-3)', fontStyle: 'italic' }}>
@@ -333,7 +333,7 @@ function MatchPage() {
                     }}
                   >
                     <strong style={{ display: 'block', marginBottom: 'var(--spacing-2)' }}>
-                      📢 공지사항
+                      공지사항
                     </strong>
                     <p style={{ fontSize: 'var(--font-size-sm)', whiteSpace: 'pre-wrap' }}>
                       {currentMatch.notice}
@@ -399,10 +399,10 @@ function MatchPage() {
                     {currentMatch.title}
                   </h3>
                   <p style={{ fontSize: 'var(--font-size-base)', marginBottom: 'var(--spacing-3)' }}>
-                    📍 {currentMatch.location}
+                    장소 · {currentMatch.location}
                   </p>
                   <p style={{ fontSize: 'var(--font-size-base)' }}>
-                    🕐 {new Date(currentMatch.datetime).toLocaleString('ko-KR')}
+                    일시 · {new Date(currentMatch.datetime).toLocaleString('ko-KR')}
                   </p>
                   {currentMatch.description && (
                     <p style={{ fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-3)', fontStyle: 'italic' }}>
@@ -468,10 +468,10 @@ function MatchPage() {
 
                 const tabTitle =
                   participantTab === 'approved'
-                    ? '✅ 승인된 참여자'
+                    ? '승인된 참여자'
                     : participantTab === 'rejected'
-                      ? '⛔ 거절된 참여자'
-                      : '⏳ 참여 대기자';
+                      ? '거절된 참여자'
+                      : '참여 대기자';
 
                 const tabParticipants =
                   participantTab === 'approved'

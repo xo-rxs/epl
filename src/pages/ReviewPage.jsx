@@ -17,19 +17,19 @@ const toAnonymousKey = (userId) => {
 
 const REVIEW_TAGS = {
   positive: [
-    { label: '매너가 좋아요', emoji: '👍' },
-    { label: '실력이 좋아요', emoji: '⭐' },
-    { label: '시간 약속을 잘 지켜요', emoji: '⏱️' },
-    { label: '소통이 잘 돼요', emoji: '💬' },
-    { label: '팀플레이가 좋아요', emoji: '🤝' },
-    { label: '분위기가 좋아요', emoji: '😄' },
+    { label: '매너가 좋아요' },
+    { label: '실력이 좋아요' },
+    { label: '시간 약속을 잘 지켜요' },
+    { label: '소통이 잘 돼요' },
+    { label: '팀플레이가 좋아요' },
+    { label: '분위기가 좋아요' },
   ],
   negative: [
-    { label: '매너가 별로에요', emoji: '😠' },
-    { label: '실력이 아쉬워요', emoji: '😕' },
-    { label: '시간 약속이 아쉬워요', emoji: '⏰' },
-    { label: '소통이 아쉬워요', emoji: '😶' },
-    { label: '팀플레이가 아쉬워요', emoji: '🙅' },
+    { label: '매너가 별로에요' },
+    { label: '실력이 아쉬워요' },
+    { label: '시간 약속이 아쉬워요' },
+    { label: '소통이 아쉬워요' },
+    { label: '팀플레이가 아쉬워요' },
   ],
 };
 
@@ -134,7 +134,7 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
             <div className="rv-tags">
               <div className="rv-tags__group">
                 {REVIEW_TAGS.positive.map((tag) => {
-                  const key = `${tag.emoji} ${tag.label}`;
+                  const key = tag.label;
                   const active = entry.tags.includes(key);
                   return (
                     <button
@@ -143,14 +143,14 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
                       className={`rv-tag rv-tag--pos ${active ? 'is-active' : ''}`}
                       onClick={() => onToggleTag(participant.id, key)}
                     >
-                      {tag.emoji} {tag.label}
+                      {tag.label}
                     </button>
                   );
                 })}
               </div>
               <div className="rv-tags__group">
                 {REVIEW_TAGS.negative.map((tag) => {
-                  const key = `${tag.emoji} ${tag.label}`;
+                  const key = tag.label;
                   const active = entry.tags.includes(key);
                   return (
                     <button
@@ -159,7 +159,7 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
                       className={`rv-tag rv-tag--neg ${active ? 'is-active' : ''}`}
                       onClick={() => onToggleTag(participant.id, key)}
                     >
-                      {tag.emoji} {tag.label}
+                      {tag.label}
                     </button>
                   );
                 })}
@@ -283,9 +283,9 @@ function ReviewPage() {
     // 첫 저장 시에만 포인트 적립 (평가 참여 혜택)
     if (isFirstSave) {
       addReviewPoints(currentUser.id, REVIEW_REWARD_POINTS);
-      setSavedMsg(`평가가 익명으로 저장되었습니다! ✅ +${REVIEW_REWARD_POINTS}P 적립`);
+      setSavedMsg(`평가가 익명으로 저장되었습니다. +${REVIEW_REWARD_POINTS}P 적립`);
     } else {
-      setSavedMsg('평가가 익명으로 수정 저장되었습니다! ✅');
+      setSavedMsg('평가가 익명으로 수정 저장되었습니다.');
     }
     setTimeout(() => setSavedMsg(''), 5000);
   };
@@ -310,7 +310,6 @@ function ReviewPage() {
       <Layout headerProps={headerProps}>
         <Container>
           <div className="rv-empty">
-            <span>🔐</span>
             <p>
               평가는 로그인 후 참여할 수 있습니다.
               <br />
@@ -339,7 +338,7 @@ function ReviewPage() {
             <h2 className="rv-page-title">경기 평가</h2>
             <p className="rv-page-desc">
               선수마다 <strong>실력</strong>과 <strong>매너</strong>를 따로 평가합니다. 받은 실력 평가는
-              자기평가와 합산되어 팀 배정에 쓰이는 <strong>보정 실력 점수</strong>에 반영돼요.
+              자기평가와 합산되어 <strong>스킬 티어</strong>와 팀 배정 점수가 객관적으로 보정돼요.
               평가는 <strong>선택사항</strong>이며 <strong>익명</strong>으로 저장되고, 완료 시{' '}
               {REVIEW_REWARD_POINTS}P가 적립됩니다.
             </p>
@@ -363,7 +362,6 @@ function ReviewPage() {
 
         {matches.length === 0 ? (
           <div className="rv-empty">
-            <span>📋</span>
             <p>먼저 경기를 생성하고 참여자를 승인해주세요.</p>
           </div>
         ) : (
@@ -429,7 +427,7 @@ function ReviewPage() {
                   <span className="rv-save-bar__hint">
                     {ratedCount < approvedParticipants.length
                       ? `${approvedParticipants.length - ratedCount}명 평가 남음`
-                      : '모든 선수 평가 완료 🎉'}
+                      : '모든 선수 평가 완료'}
                   </span>
                   <Button variant="primary" onClick={handleSave}>
                     {ratedCount === approvedParticipants.length ? '평가 완료' : '임시 저장'}
@@ -440,7 +438,6 @@ function ReviewPage() {
 
             {selectedMatch && approvedParticipants.length === 0 && (
               <div className="rv-empty">
-                <span>👥</span>
                 <p>평가할 수 있는 참여자가 없습니다. (본인은 평가 대상에서 제외됩니다)</p>
               </div>
             )}

@@ -16,7 +16,7 @@ function ParticipantList({
   onRemove,
   onApprove,
   onReject,
-  title = '👥 참여자 목록',
+  title = '참여자 목록',
   loading = false,
 }) {
   const getStatus = (participant) => participant.status || 'approved';
