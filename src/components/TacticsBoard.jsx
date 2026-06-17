@@ -576,7 +576,7 @@ function TacticsBoard({ match }) {
                     .filter(Boolean)
                     .join(' ')}
                 >
-                  <span className="player-draggable-name">{activePlayer.nickname}</span>
+                  <span className="player-draggable-name">{activePlayer.name}</span>
                   <span className="player-draggable-meta">{activePlayer.position || 'POS'}</span>
                 </div>
               )}

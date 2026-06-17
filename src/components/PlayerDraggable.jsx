@@ -27,7 +27,7 @@ function PlayerDraggable({ player, team }) {
       {...listeners}
       {...attributes}
     >
-      <span className="player-draggable-name">{player.nickname}</span>
+      <span className="player-draggable-name">{player.name}</span>
       <span className="player-draggable-meta">{player.position || 'POS'}</span>
     </div>
   );

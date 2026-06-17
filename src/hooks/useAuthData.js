@@ -38,8 +38,7 @@ const hashPassword = (password) => {
 const buildPublicUser = (user) => ({
   id: user.id,
   email: user.email,
-  name: user.name || user.nickname,
-  nickname: user.nickname || user.name,
+  name: user.name,
   age: user.age,
   preferredPosition: user.preferredPosition,
   skillTier: user.skillTier,
@@ -116,7 +115,6 @@ function useAuthData() {
       id: `user_${Date.now()}`,
       email,
       name,
-      nickname: name,
       age,
       preferredPosition,
       skillTier: null,

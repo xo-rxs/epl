@@ -36,7 +36,7 @@ function MatchActions({ match, onStatusChange, onDelete }) {
   const handleExportCSV = () => {
     const csvData = match.participants.map((p, index) => ({
       '순서': index + 1,
-      '이름': p.name || p.nickname,
+      '이름': p.name,
       '나이': p.age || '',
       '포지션': p.position,
       '스킬티어': p.skillTier || '',
@@ -154,6 +154,17 @@ function MatchActions({ match, onStatusChange, onDelete }) {
             fullWidth
           >
             준비 완료
+          </Button>
+        )}
+
+        {onStatusChange && match.status === 'ready' && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => onStatusChange('recruiting')}
+            fullWidth
+          >
+            준비완료 취소
           </Button>
         )}
 

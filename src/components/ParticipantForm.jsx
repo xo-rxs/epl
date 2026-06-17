@@ -66,8 +66,7 @@ function ParticipantForm({
 
     onSubmit({
       userId: currentUser.id,
-      name: currentUser.name || currentUser.nickname,
-      nickname: currentUser.name || currentUser.nickname,
+      name: currentUser.name,
       age: Number(currentUser.age),
       position: currentUser.preferredPosition,
       skillTier: currentUser.skillTier,
@@ -110,7 +109,7 @@ function ParticipantForm({
             }}
           >
             <div>
-              <strong>{currentUser.name || currentUser.nickname}</strong>
+              <strong>{currentUser.name}</strong>
               <span style={{ marginLeft: 'var(--spacing-2)', color: 'var(--color-gray-600)' }}>
                 {currentUser.age}세
               </span>

@@ -94,7 +94,7 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
       {/* 선수 정보 */}
       <div className="rv-card__top">
         <div className="rv-card__info">
-          <span className="rv-card__name">{participant.name || participant.nickname}</span>
+          <span className="rv-card__name">{participant.name}</span>
           <span className="rv-card__meta">
             {participant.age ? `${participant.age}세` : `${participant.year}학년`}
             {' · '}{participant.position}
@@ -262,7 +262,7 @@ function ReviewPage() {
       const e = entries[p.id] || { rating: 0, skillRating: 0, tags: [] };
       return {
         participantId: p.id,
-        nickname: p.name || p.nickname,
+        name: p.name,
         age: p.age,
         position: p.position,
         rating: Number(e.rating) || 0,

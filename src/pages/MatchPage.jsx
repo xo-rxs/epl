@@ -160,7 +160,6 @@ function MatchPage() {
       addParticipant(currentMatch.id, {
         userId: formData.userId,
         name: formData.name,
-        nickname: formData.name,
         age: parseInt(formData.age, 10),
         position: formData.position,
         skillTier: formData.skillTier,
@@ -233,6 +232,12 @@ function MatchPage() {
     if (!currentMatch) return;
     updateMatch(currentMatch.id, { notice: noticeDraft.trim() });
     alert('공지사항이 저장되었습니다.');
+  };
+
+  // 팀 구성 확정 (자동 또는 수동 조정 결과 저장)
+  const handleConfirmTeams = (teams) => {
+    if (!currentMatch) return;
+    updateMatch(currentMatch.id, { teams, status: 'ready' });
   };
 
   // 경기 삭제
@@ -538,13 +543,20 @@ function MatchPage() {
                 (participant) => getStatus(participant) === 'approved'
               );
 
-              if (currentMatch.status !== 'recruiting' || approvedParticipants.length < 2) {
-                return null;
-              }
+              const showTeamBuilder =
+                (currentMatch.status === 'recruiting' || currentMatch.status === 'ready') &&
+                approvedParticipants.length >= 2;
+
+              if (!showTeamBuilder) return null;
 
               return (
               <div style={{ marginBottom: 'var(--spacing-6)' }}>
-                <TeamBuilder participants={approvedParticipants} />
+                <TeamBuilder
+                  participants={approvedParticipants}
+                  onConfirmTeams={handleConfirmTeams}
+                  confirmedTeams={currentMatch.teams}
+                  confirmedAt={currentMatch.updatedAt}
+                />
               </div>
               );
             })()}

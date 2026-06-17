@@ -354,7 +354,7 @@ function AuthPage() {
               <div className="auth-current-user">
                 <dl className="auth-user-info">
                   {[
-                    ['이름', currentUser.name || currentUser.nickname],
+                    ['이름', currentUser.name],
                     ['이메일', currentUser.email],
                     ['나이', currentUser.age ? `${currentUser.age}세` : '미입력'],
                     ['선호 포지션', currentUser.preferredPosition || '미입력'],
