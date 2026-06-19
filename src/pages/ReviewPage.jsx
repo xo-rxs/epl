@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Layout, Container, Button } from '../components';
 import { useAuthData, useMatchData } from '../hooks';
-import { addReviewPoints, REVIEW_REWARD_POINTS } from '../utils/reviewPoints';
+import { addReviewPoints, REVIEW_REWARD_POINTS, MOM_SKILL_POINTS, MOM_MANNER_POINTS } from '../utils/reviewPoints';
 import '../styles/ReviewPage.css';
 
 const getStatus = (p) => p.status || 'approved';
@@ -33,23 +33,23 @@ const REVIEW_TAGS = {
   ],
 };
 
+// 기본값 ★3으로 초기화 (미터치 상태)
 const buildInitialEntries = (participants, existingEntries = []) => {
   const map = {};
   existingEntries.forEach((e) => {
     map[e.participantId] = {
-      rating: e.rating || 0,
-      skillRating: e.skillRating || 0,
+      rating: e.rating || 3,
+      skillRating: e.skillRating || 3,
       tags: e.tags || [],
       touched: true,
     };
   });
   participants.forEach((p) => {
-    if (!map[p.id]) map[p.id] = { rating: 0, skillRating: 0, tags: [], touched: false };
+    if (!map[p.id]) map[p.id] = { rating: 3, skillRating: 3, tags: [], touched: false };
   });
   return map;
 };
 
-// 실력·매너 모두 별점을 매겼는지 여부
 const isFullyRated = (entry) => entry?.rating > 0 && entry?.skillRating > 0;
 
 /* 별점 한 줄 (실력/매너 공용) */
@@ -100,10 +100,13 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
             {' · '}{participant.position}
           </span>
         </div>
-        {rated && (
+        {touched && rated && (
           <div className="rv-card__done-badge">
             실력 ★{entry.skillRating} · 매너 ★{entry.rating}
           </div>
+        )}
+        {!touched && (
+          <div className="rv-card__default-badge">기본값 ★3</div>
         )}
       </div>
 
@@ -120,7 +123,7 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
       />
 
       {/* 태그 (별점 선택 후 펼쳐짐) */}
-      {(entry.rating > 0 || entry.skillRating > 0) && (
+      {touched && (entry.rating > 0 || entry.skillRating > 0) && (
         <div className="rv-tags-section">
           <button
             type="button"
@@ -172,15 +175,68 @@ function ReviewCard({ participant, entry, onRate, onToggleTag, cardRef }) {
   );
 }
 
+/* MOM 선택 섹션 */
+function MomSection({ participants, skillMom, mannerMom, onSelectSkillMom, onSelectMannerMom }) {
+  return (
+    <div className="rv-mom-section">
+      <h3 className="rv-mom-title">Man of the Match</h3>
+      <p className="rv-mom-desc">오늘 경기에서 가장 빛났던 팀원을 선택해주세요. (선택사항)</p>
+
+      <div className="rv-mom-row">
+        <div className="rv-mom-label">
+          <span className="rv-mom-label__icon">⚽</span>
+          <span>실력 MOM</span>
+          {skillMom && <span className="rv-mom-points-hint">선정 시 +{MOM_SKILL_POINTS}P</span>}
+        </div>
+        <div className="rv-mom-grid">
+          {participants.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              className={`rv-mom-btn ${skillMom === p.id ? 'is-active' : ''}`}
+              onClick={() => onSelectSkillMom(skillMom === p.id ? null : p.id)}
+            >
+              <span className="rv-mom-btn__name">{p.name}</span>
+              <span className="rv-mom-btn__pos">{p.position}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="rv-mom-row">
+        <div className="rv-mom-label">
+          <span className="rv-mom-label__icon">🤝</span>
+          <span>매너 MOM</span>
+          {mannerMom && <span className="rv-mom-points-hint">선정 시 +{MOM_MANNER_POINTS}P</span>}
+        </div>
+        <div className="rv-mom-grid">
+          {participants.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              className={`rv-mom-btn ${mannerMom === p.id ? 'is-active' : ''}`}
+              onClick={() => onSelectMannerMom(mannerMom === p.id ? null : p.id)}
+            >
+              <span className="rv-mom-btn__name">{p.name}</span>
+              <span className="rv-mom-btn__pos">{p.position}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ReviewPage() {
   const { matches, updateMatch } = useMatchData();
   const { currentUser } = useAuthData();
   const [selectedMatchId, setSelectedMatchId] = useState(matches[0]?.id || '');
   const [entries, setEntries] = useState({});
+  const [skillMom, setSkillMom] = useState(null);
+  const [mannerMom, setMannerMom] = useState(null);
   const [savedMsg, setSavedMsg] = useState('');
   const cardRefs = useRef({});
 
-  // 평가 데이터에는 익명 키만 저장된다 (누가 평가했는지 노출되지 않음)
   const reviewerKey = currentUser ? toAnonymousKey(currentUser.id) : null;
 
   const selectedMatch = useMemo(
@@ -188,51 +244,75 @@ function ReviewPage() {
     [matches, selectedMatchId]
   );
 
-  // 내가 이전에 저장한 평가 (익명 키 기준)
   const myReview = useMemo(() => {
     if (!selectedMatch || !reviewerKey) return null;
     return selectedMatch.reviewsByUser?.[reviewerKey] || null;
   }, [selectedMatch, reviewerKey]);
 
-  // 승인된 참여자 중 본인을 제외한 평가 대상
-  const approvedParticipants = useMemo(() => {
-    if (!selectedMatch) return [];
-    return (selectedMatch.participants || []).filter(
-      (p) => getStatus(p) === 'approved' && p.userId !== currentUser?.id
+  // 내가 속한 팀 찾기 (teamAssignment 있을 때만)
+  const myTeamParticipants = useMemo(() => {
+    if (!selectedMatch || !currentUser) return null;
+    const ta = selectedMatch.teamAssignment;
+    if (!ta) return null;
+
+    const myParticipant = (selectedMatch.participants || []).find(
+      (p) => p.userId === currentUser.id
     );
+    if (!myParticipant) return null;
+
+    const inTeamA = (ta.teamA || []).some((p) => p.id === myParticipant.id);
+    const inTeamB = (ta.teamB || []).some((p) => p.id === myParticipant.id);
+    if (!inTeamA && !inTeamB) return null;
+
+    const myTeam = inTeamA ? ta.teamA : ta.teamB;
+    // 같은 팀에서 본인 제외
+    return myTeam.filter((p) => p.userId !== currentUser.id);
   }, [selectedMatch, currentUser]);
 
-  useEffect(() => {
-    if (!selectedMatch) { setEntries({}); return; }
-    setEntries(buildInitialEntries(approvedParticipants, myReview?.entries || []));
-  }, [approvedParticipants, selectedMatch, myReview]);
+  // 팀 배정 있으면 팀원만, 없으면 전원 표시 (fallback)
+  const reviewTargets = useMemo(() => {
+    if (!selectedMatch) return [];
+    const all = (selectedMatch.participants || []).filter(
+      (p) => getStatus(p) === 'approved' && p.userId !== currentUser?.id
+    );
+    if (myTeamParticipants !== null) return myTeamParticipants;
+    return all;
+  }, [selectedMatch, currentUser, myTeamParticipants]);
 
-  const ratedCount = useMemo(
-    () => approvedParticipants.filter((p) => isFullyRated(entries[p.id])).length,
-    [approvedParticipants, entries]
+  const isTeamFiltered = myTeamParticipants !== null;
+
+  useEffect(() => {
+    if (!selectedMatch) { setEntries({}); setSkillMom(null); setMannerMom(null); return; }
+    setEntries(buildInitialEntries(reviewTargets, myReview?.entries || []));
+    setSkillMom(myReview?.skillMom || null);
+    setMannerMom(myReview?.mannerMom || null);
+  }, [reviewTargets, selectedMatch, myReview]);
+
+  const touchedCount = useMemo(
+    () => reviewTargets.filter((p) => entries[p.id]?.touched).length,
+    [reviewTargets, entries]
   );
 
-  /* 별점 선택 → 실력·매너 모두 매기면 다음 미평가 선수로 자동 스크롤 */
+  /* 별점 선택 → 실력·매너 모두 매기면 다음 미터치 선수로 자동 스크롤 */
   const handleRate = useCallback((participantId, field, score) => {
     setEntries((prev) => ({
       ...prev,
       [participantId]: { ...prev[participantId], [field]: score, touched: true },
     }));
 
-    // 이번 선택으로 실력·매너가 모두 채워졌을 때만 다음 선수로 이동
     const updatedEntry = { ...entries[participantId], [field]: score };
     if (!isFullyRated(updatedEntry)) return;
 
-    const idx = approvedParticipants.findIndex((p) => p.id === participantId);
-    const nextUnrated = approvedParticipants.slice(idx + 1).find(
-      (p) => !isFullyRated(entries[p.id])
+    const idx = reviewTargets.findIndex((p) => p.id === participantId);
+    const nextUntouched = reviewTargets.slice(idx + 1).find(
+      (p) => !entries[p.id]?.touched
     );
-    if (nextUnrated) {
+    if (nextUntouched) {
       setTimeout(() => {
-        cardRefs.current[nextUnrated.id]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        cardRefs.current[nextUntouched.id]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 200);
     }
-  }, [approvedParticipants, entries]);
+  }, [reviewTargets, entries]);
 
   const handleToggleTag = useCallback((participantId, tag) => {
     setEntries((prev) => {
@@ -242,48 +322,70 @@ function ReviewPage() {
         [participantId]: {
           ...prev[participantId],
           tags: tags.includes(tag) ? tags.filter((t) => t !== tag) : [...tags, tag],
+          touched: true,
         },
       };
     });
   }, []);
 
+  // 전체 무난: 모든 항목을 기본값 ★3으로 초기화
+  const handleAllDefault = useCallback(() => {
+    setEntries((prev) => {
+      const next = { ...prev };
+      reviewTargets.forEach((p) => {
+        next[p.id] = { rating: 3, skillRating: 3, tags: [], touched: false };
+      });
+      return next;
+    });
+    setSkillMom(null);
+    setMannerMom(null);
+  }, [reviewTargets]);
+
   const handleSave = () => {
     if (!selectedMatch || !currentUser || !reviewerKey) return;
 
-    const hasAnyRating = approvedParticipants.some(
-      (p) => entries[p.id]?.rating > 0 || entries[p.id]?.skillRating > 0
-    );
-    if (!hasAnyRating) {
-      alert('최소 한 명 이상 별점을 매긴 후 저장할 수 있습니다.');
-      return;
-    }
-
-    const reviewEntries = approvedParticipants.map((p) => {
-      const e = entries[p.id] || { rating: 0, skillRating: 0, tags: [] };
+    const reviewEntries = reviewTargets.map((p) => {
+      const e = entries[p.id] || { rating: 3, skillRating: 3, tags: [] };
       return {
         participantId: p.id,
         name: p.name,
         age: p.age,
         position: p.position,
-        rating: Number(e.rating) || 0,
-        skillRating: Number(e.skillRating) || 0,
+        rating: Number(e.rating) || 3,
+        skillRating: Number(e.skillRating) || 3,
         tags: e.tags || [],
       };
     });
 
-    // 평가자별로 익명 키 아래에 저장 (참여자 누구나 평가 가능, 익명 보장)
     const isFirstSave = !myReview;
     updateMatch(selectedMatch.id, {
       reviewsByUser: {
         ...(selectedMatch.reviewsByUser || {}),
-        [reviewerKey]: { createdAt: new Date().toISOString(), entries: reviewEntries },
+        [reviewerKey]: {
+          createdAt: new Date().toISOString(),
+          entries: reviewEntries,
+          skillMom: skillMom || null,
+          mannerMom: mannerMom || null,
+        },
       },
     });
 
-    // 첫 저장 시에만 포인트 적립 (평가 참여 혜택)
+    // 첫 저장 시에만 포인트 적립
     if (isFirstSave) {
       addReviewPoints(currentUser.id, REVIEW_REWARD_POINTS);
-      setSavedMsg(`평가가 익명으로 저장되었습니다. +${REVIEW_REWARD_POINTS}P 적립`);
+
+      // MOM 수신자에게 포인트 지급
+      if (skillMom) {
+        const momParticipant = (selectedMatch.participants || []).find((p) => p.id === skillMom);
+        if (momParticipant?.userId) addReviewPoints(momParticipant.userId, MOM_SKILL_POINTS);
+      }
+      if (mannerMom) {
+        const momParticipant = (selectedMatch.participants || []).find((p) => p.id === mannerMom);
+        if (momParticipant?.userId) addReviewPoints(momParticipant.userId, MOM_MANNER_POINTS);
+      }
+
+      const momMsg = [skillMom && '실력 MOM', mannerMom && '매너 MOM'].filter(Boolean).join(' · ');
+      setSavedMsg(`평가가 익명으로 저장되었습니다. +${REVIEW_REWARD_POINTS}P 적립${momMsg ? ` · ${momMsg} 선정 완료` : ''}`);
     } else {
       setSavedMsg('평가가 익명으로 수정 저장되었습니다.');
     }
@@ -304,7 +406,6 @@ function ReviewPage() {
     ],
   };
 
-  // 비로그인 상태에서는 익명 평가를 위해 로그인 안내
   if (!currentUser) {
     return (
       <Layout headerProps={headerProps}>
@@ -317,9 +418,7 @@ function ReviewPage() {
             </p>
             <Button
               variant="primary"
-              onClick={() => {
-                window.location.href = '/?page=auth';
-              }}
+              onClick={() => { window.location.href = '/?page=auth'; }}
             >
               로그인하기
             </Button>
@@ -337,10 +436,11 @@ function ReviewPage() {
           <div>
             <h2 className="rv-page-title">경기 평가</h2>
             <p className="rv-page-desc">
-              선수마다 <strong>실력</strong>과 <strong>매너</strong>를 따로 평가합니다. 받은 실력 평가는
-              자기평가와 합산되어 <strong>스킬 티어</strong>와 팀 배정 점수가 객관적으로 보정돼요.
-              평가는 <strong>선택사항</strong>이며 <strong>익명</strong>으로 저장되고, 완료 시{' '}
-              {REVIEW_REWARD_POINTS}P가 적립됩니다.
+              {isTeamFiltered
+                ? '같은 팀 팀원만 평가합니다. '
+                : ''}
+              <strong>실력</strong>과 <strong>매너</strong>를 따로 평가합니다.
+              기본값은 ★3이며, 평가 완료 시 {REVIEW_REWARD_POINTS}P가 적립됩니다.
             </p>
           </div>
         </div>
@@ -351,9 +451,7 @@ function ReviewPage() {
             <button
               type="button"
               className="rv-toast__link"
-              onClick={() => {
-                window.location.href = '/?page=auth';
-              }}
+              onClick={() => { window.location.href = '/?page=auth'; }}
             >
               마이페이지에서 확인 →
             </button>
@@ -385,20 +483,27 @@ function ReviewPage() {
               </div>
             </div>
 
-            {selectedMatch && approvedParticipants.length > 0 && (
+            {selectedMatch && reviewTargets.length > 0 && (
               <>
+                {/* 팀 필터 안내 */}
+                {isTeamFiltered && (
+                  <div className="rv-team-notice">
+                    같은 팀 {reviewTargets.length}명만 평가합니다
+                  </div>
+                )}
+
                 {/* 진행률 */}
                 <div className="rv-progress">
                   <div className="rv-progress__top">
-                    <span className="rv-progress__label">평가 진행률</span>
+                    <span className="rv-progress__label">직접 수정</span>
                     <span className="rv-progress__count">
-                      {ratedCount} / {approvedParticipants.length}명
+                      {touchedCount} / {reviewTargets.length}명
                     </span>
                   </div>
                   <div className="rv-progress__bar">
                     <div
                       className="rv-progress__fill"
-                      style={{ width: `${(ratedCount / approvedParticipants.length) * 100}%` }}
+                      style={{ width: `${(touchedCount / reviewTargets.length) * 100}%` }}
                     />
                   </div>
                   {myReview?.createdAt && (
@@ -410,11 +515,11 @@ function ReviewPage() {
 
                 {/* 선수 카드 목록 */}
                 <div className="rv-list">
-                  {approvedParticipants.map((p) => (
+                  {reviewTargets.map((p) => (
                     <ReviewCard
                       key={p.id}
                       participant={p}
-                      entry={entries[p.id] || { rating: 0, tags: [], touched: false }}
+                      entry={entries[p.id] || { rating: 3, skillRating: 3, tags: [], touched: false }}
                       onRate={handleRate}
                       onToggleTag={handleToggleTag}
                       cardRef={(el) => { cardRefs.current[p.id] = el; }}
@@ -422,21 +527,32 @@ function ReviewPage() {
                   ))}
                 </div>
 
+                {/* MOM 선택 */}
+                <MomSection
+                  participants={reviewTargets}
+                  skillMom={skillMom}
+                  mannerMom={mannerMom}
+                  onSelectSkillMom={setSkillMom}
+                  onSelectMannerMom={setMannerMom}
+                />
+
                 {/* 저장 */}
                 <div className="rv-save-bar">
-                  <span className="rv-save-bar__hint">
-                    {ratedCount < approvedParticipants.length
-                      ? `${approvedParticipants.length - ratedCount}명 평가 남음`
-                      : '모든 선수 평가 완료'}
-                  </span>
+                  <button
+                    type="button"
+                    className="rv-all-default-btn"
+                    onClick={handleAllDefault}
+                  >
+                    전체 무난 (★3 초기화)
+                  </button>
                   <Button variant="primary" onClick={handleSave}>
-                    {ratedCount === approvedParticipants.length ? '평가 완료' : '임시 저장'}
+                    {touchedCount === reviewTargets.length ? '평가 완료' : '저장하기'}
                   </Button>
                 </div>
               </>
             )}
 
-            {selectedMatch && approvedParticipants.length === 0 && (
+            {selectedMatch && reviewTargets.length === 0 && (
               <div className="rv-empty">
                 <p>평가할 수 있는 참여자가 없습니다. (본인은 평가 대상에서 제외됩니다)</p>
               </div>

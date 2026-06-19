@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Layout,
   Container,
@@ -9,9 +9,11 @@ import {
   TeamBuilder,
   Button,
 } from '../components';
+import RadarChart from '../components/RadarChart';
 import { useAuthData, useMatchData } from '../hooks';
 import { getMatchBadge, isJoinClosed } from '../utils/matchStatus';
 import { REGION_OPTIONS } from '../utils/constants';
+import { computeMatchRadarScores, computeMomResults } from '../utils/chartConfig';
 
 // 경기 일시를 목록 카드용 문자열로 변환 (예: 6월 4일 (목) 20:00)
 const formatMatchDate = (datetime) => {
@@ -24,6 +26,106 @@ const formatMatchDate = (datetime) => {
     minute: '2-digit',
   });
 };
+
+/* 경기 평균 평가 레이더 차트 섹션 */
+function MatchRadarSection({ match }) {
+  const radarData = useMemo(() => computeMatchRadarScores(match?.reviewsByUser), [match]);
+  const reviewerCount = match?.reviewsByUser ? Object.keys(match.reviewsByUser).length : 0;
+
+  return (
+    <div
+      style={{
+        marginTop: 'var(--spacing-6)',
+        padding: 'var(--spacing-6)',
+        backgroundColor: 'var(--color-gray-50)',
+        border: '1px solid var(--color-gray-200)',
+        borderRadius: 'var(--radius-lg)',
+      }}
+    >
+      <div style={{ marginBottom: 'var(--spacing-4)' }}>
+        <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-1)' }}>
+          이번 경기 평균 평가
+        </h3>
+        <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-gray-500)' }}>
+          {reviewerCount > 0
+            ? `${reviewerCount}명이 평가에 참여했습니다.`
+            : '경기 후 평가 페이지에서 동료를 평가하면 여기에 나타납니다.'}
+        </p>
+      </div>
+      <RadarChart
+        radarData={radarData}
+        emptyMessage="아직 평가 데이터가 없습니다."
+        color="#3498db"
+      />
+    </div>
+  );
+}
+
+/* 경기 MOM 결과 섹션 */
+function MatchMomSection({ match }) {
+  const momResults = useMemo(
+    () => computeMomResults(match?.reviewsByUser, match?.participants),
+    [match]
+  );
+
+  const cardStyle = {
+    marginTop: 'var(--spacing-4)',
+    padding: 'var(--spacing-6)',
+    background: 'linear-gradient(135deg, #fffbf0 0%, #fff8e1 100%)',
+    border: '1px solid #f5c842',
+    borderRadius: 'var(--radius-lg)',
+  };
+
+  const rowStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--spacing-3)',
+    marginBottom: 'var(--spacing-3)',
+  };
+
+  const badgeStyle = (color) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 'var(--spacing-2)',
+    padding: 'var(--spacing-2) var(--spacing-4)',
+    background: color + '18',
+    border: `1.5px solid ${color}60`,
+    borderRadius: 'var(--radius-md)',
+    fontWeight: 'var(--font-weight-bold)',
+    color,
+    fontSize: 'var(--font-size-sm)',
+  });
+
+  return (
+    <div style={cardStyle}>
+      <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-4)' }}>
+        Man of the Match
+      </h3>
+      {!momResults ? (
+        <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-gray-400)' }}>
+          경기 후 평가 페이지에서 MOM을 선정하면 여기에 나타납니다.
+        </p>
+      ) : (
+        <>
+          {momResults.skillMom && (
+            <div style={rowStyle}>
+              <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-gray-500)', minWidth: 60 }}>⚽ 실력 MOM</span>
+              <span style={badgeStyle('#e67e22')}>{momResults.skillMom.name}</span>
+              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-gray-400)' }}>{momResults.skillMom.votes}표</span>
+            </div>
+          )}
+          {momResults.mannerMom && (
+            <div style={rowStyle}>
+              <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-gray-500)', minWidth: 60 }}>🤝 매너 MOM</span>
+              <span style={badgeStyle('#2ecc71')}>{momResults.mannerMom.name}</span>
+              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-gray-400)' }}>{momResults.mannerMom.votes}표</span>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
 
 /**
  * MatchPage 컴포넌트
@@ -566,6 +668,10 @@ function MatchPage() {
               onStatusChange={handleStatusChange}
               onDelete={handleDeleteMatch}
             />
+
+            {/* 이번 경기 평균 평가 레이더 차트 */}
+            <MatchRadarSection match={currentMatch} />
+            <MatchMomSection match={currentMatch} />
           </div>
         )}
 

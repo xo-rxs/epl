@@ -8,6 +8,10 @@ const POINTS_KEY = 'epl_review_points';
 // 평가 1회 완료 시 적립 포인트
 export const REVIEW_REWARD_POINTS = 10;
 
+// MOM 선정 시 수신자에게 적립되는 포인트
+export const MOM_SKILL_POINTS = 5;
+export const MOM_MANNER_POINTS = 5;
+
 const readPoints = () => {
   try {
     const value = window.localStorage.getItem(POINTS_KEY);
