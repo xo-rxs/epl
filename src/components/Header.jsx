@@ -58,7 +58,7 @@ function Header({
           {currentUser ? (
             <div className="header-user">
               <a href="/?page=auth" className="header-user-name">
-                {currentUser.name || currentUser.nickname}
+                {currentUser.name}
               </a>
               <Button variant="secondary" size="sm" onClick={logout}>
                 로그아웃

@@ -71,7 +71,7 @@ function ParticipantList({
           <div key={participant.id} className="participant-item">
             <div className="participant-number">{index + 1}</div>
             <div className="participant-info">
-              <div className="participant-name">{participant.name || participant.nickname}</div>
+              <div className="participant-name">{participant.name}</div>
               <div className="participant-meta">
                 <span className="participant-year">
                   {participant.age ? `${participant.age}세` : `${participant.year}학년`}
@@ -108,7 +108,7 @@ function ParticipantList({
                 <button
                   className="participant-remove-btn"
                   onClick={() => {
-                    if (window.confirm(`${participant.name || participant.nickname}을(를) 제거하시겠습니까?`)) {
+                    if (window.confirm(`${participant.name}을(를) 제거하시겠습니까?`)) {
                       onRemove(participant.id);
                     }
                   }}

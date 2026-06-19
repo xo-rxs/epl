@@ -262,6 +262,123 @@
   margin-left: 3px;
 }
 
+/* ── 수동 조정 배너 ── */
+.tb-manual-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4) var(--spacing-5);
+  background: #fff8e1;
+  border: 1.5px solid #f59f00;
+  border-radius: var(--radius-lg);
+  flex-wrap: wrap;
+}
+
+.tb-manual-banner-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: #92650a;
+}
+
+.tb-manual-banner-actions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+/* ── 확정 배너 ── */
+.tb-confirmed-banner {
+  padding: var(--spacing-3) var(--spacing-5);
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-sm);
+  color: #166534;
+}
+
+/* ── 수동 조정 모드 팀 카드 ── */
+.tb-team-card.is-manual {
+  border: 2px dashed var(--color-gray-300);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.tb-team-card.tb-team-a.is-manual {
+  border-color: #93c5fd;
+}
+
+.tb-team-card.tb-team-b.is-manual {
+  border-color: #fca5a5;
+}
+
+/* ── 드롭 오버 상태 ── */
+.tb-player-list.is-drop-over {
+  background: #f0f9ff;
+  border-radius: var(--radius-base);
+}
+
+.tb-team-card.tb-team-a .tb-player-list.is-drop-over {
+  background: #eff6ff;
+}
+
+.tb-team-card.tb-team-b .tb-player-list.is-drop-over {
+  background: #fff1f2;
+}
+
+/* ── 드래그 가능한 선수 행 ── */
+.tb-player-row.is-draggable {
+  cursor: grab;
+  touch-action: none;
+}
+
+.tb-player-row.is-draggable:hover {
+  background: var(--color-gray-50);
+}
+
+.tb-player-row.is-draggable:active {
+  cursor: grabbing;
+}
+
+.tb-player-row.is-dragging {
+  opacity: 0.35;
+  background: var(--color-gray-100);
+}
+
+/* ── 드래그 핸들 아이콘 ── */
+.tb-drag-handle {
+  width: 16px;
+  font-size: 14px;
+  color: var(--color-gray-300);
+  flex-shrink: 0;
+  user-select: none;
+  line-height: 1;
+}
+
+.tb-player-row.is-draggable:hover .tb-drag-handle {
+  color: var(--color-gray-500);
+}
+
+/* ── 드래그 오버레이 카드 ── */
+.tb-drag-overlay {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--color-white);
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-base);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  cursor: grabbing;
+  width: max-content;
+  min-width: 160px;
+}
+
+.tb-drag-overlay-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-900);
+  flex: 1;
+}
+
 /* ── 빈 상태 ── */
 .tb-empty {
   display: flex;

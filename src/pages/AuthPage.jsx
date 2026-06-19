@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Layout, Container, Input, Button } from '../components';
+import RadarChart from '../components/RadarChart';
 import { useAuthData, useMatchData } from '../hooks';
 import { getReviewPoints } from '../utils/reviewPoints';
 import {
@@ -10,6 +11,7 @@ import {
   SCORE_BY_TIER,
   scoreToMeters,
 } from '../utils/skillScore';
+import { computeUserRadarScores } from '../utils/chartConfig';
 import '../styles/AuthPage.css';
 
 const INITIAL_FORM = {
@@ -190,6 +192,8 @@ function AuthPage() {
     const mannerRatings = [];
     const skillRatings = [];
     const tagCounts = {};
+    let skillMomCount = 0;
+    let mannerMomCount = 0;
 
     matches.forEach((match) => {
       const myParticipantIds = new Set(
@@ -200,6 +204,10 @@ function AuthPage() {
       if (myParticipantIds.size === 0) return;
 
       Object.values(match.reviewsByUser || {}).forEach((review) => {
+        // MOM 수상 집계
+        if (review.skillMom && myParticipantIds.has(review.skillMom)) skillMomCount += 1;
+        if (review.mannerMom && myParticipantIds.has(review.mannerMom)) mannerMomCount += 1;
+
         (review.entries || []).forEach((entry) => {
           if (!myParticipantIds.has(entry.participantId)) return;
           if (!(entry.rating > 0) && !(entry.skillRating > 0)) return;
@@ -225,10 +233,18 @@ function AuthPage() {
       topTags: Object.entries(tagCounts)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 3),
+      skillMomCount,
+      mannerMomCount,
     };
   }, [matches, currentUser]);
 
   const reviewPoints = currentUser ? getReviewPoints(currentUser.id) : 0;
+
+  // 내 레이더 차트 데이터 (전체 경기에서 받은 평가 합산)
+  const myRadarData = useMemo(
+    () => (currentUser ? computeUserRadarScores(matches, currentUser.id) : null),
+    [matches, currentUser]
+  );
 
   const peerSkillStats = currentUser
     ? getPeerSkillStats(matches, currentUser.id)
@@ -354,7 +370,7 @@ function AuthPage() {
               <div className="auth-current-user">
                 <dl className="auth-user-info">
                   {[
-                    ['이름', currentUser.name || currentUser.nickname],
+                    ['이름', currentUser.name],
                     ['이메일', currentUser.email],
                     ['나이', currentUser.age ? `${currentUser.age}세` : '미입력'],
                     ['선호 포지션', currentUser.preferredPosition || '미입력'],
@@ -381,6 +397,16 @@ function AuthPage() {
                   isUnranked={isUnranked}
                 />
 
+                {/* 내 평가 레이더 차트 */}
+                <div className="auth-radar-section">
+                  <p className="auth-radar-title">내 평가 프로필</p>
+                  <RadarChart
+                    radarData={myRadarData}
+                    emptyMessage="경기에 참여하고 동료 평가를 받으면 나타나요."
+                    color="#2ecc71"
+                  />
+                </div>
+
                 {/* 받은 평가 요약 + 평가 포인트 */}
                 <div className="auth-review-summary">
                   <div className="auth-review-stat">
@@ -406,6 +432,24 @@ function AuthPage() {
                     <span className="auth-review-stat__label">받은 평가</span>
                   </div>
                 </div>
+
+                {/* MOM 수상 횟수 */}
+                {((reviewSummary?.skillMomCount || 0) > 0 || (reviewSummary?.mannerMomCount || 0) > 0) && (
+                  <div className="auth-review-summary" style={{ marginTop: 'var(--spacing-3)' }}>
+                    <div className="auth-review-stat">
+                      <span className="auth-review-stat__value" style={{ color: '#e67e22' }}>
+                        ⚽ {reviewSummary?.skillMomCount || 0}회
+                      </span>
+                      <span className="auth-review-stat__label">실력 MOM</span>
+                    </div>
+                    <div className="auth-review-stat">
+                      <span className="auth-review-stat__value" style={{ color: '#2ecc71' }}>
+                        🤝 {reviewSummary?.mannerMomCount || 0}회
+                      </span>
+                      <span className="auth-review-stat__label">매너 MOM</span>
+                    </div>
+                  </div>
+                )}
 
                 {reviewSummary?.topTags.length > 0 && (
                   <div className="auth-review-tags">

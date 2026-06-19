@@ -1,0 +1,37 @@
+/* RadarChart 컴포넌트 스타일 */
+
+.radar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+}
+
+.radar-chart-area {
+  width: 100%;
+  max-width: 280px;
+}
+
+.radar-count {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-400);
+  text-align: center;
+}
+
+/* 빈 상태 */
+.radar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  background: var(--color-gray-50);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+}
+
+.radar-empty p {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-400);
+  text-align: center;
+}
