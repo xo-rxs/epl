@@ -1,4 +1,4 @@
-/* ===== Input — Apple search-input / form style ===== */
+/* Input 컴포넌트 스타일 */
 
 .input-group {
   display: flex;
@@ -8,10 +8,9 @@
 }
 
 .input-group label {
-  font-size: var(--font-size-sm);              /* 14px */
-  font-weight: var(--font-weight-semibold);    /* 600 */
-  letter-spacing: var(--ls-caption);
-  color: var(--color-ink);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-700);
 }
 
 .input-wrapper {
@@ -20,82 +19,87 @@
   align-items: center;
 }
 
-/* ── Input Field (search-input: pill shape, 44px) ── */
+/* ===== Input Field ===== */
 .input-field {
   width: 100%;
-  padding: 12px 20px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: var(--radius-full);           /* pill */
-  font-size: var(--font-size-base);            /* 17px */
-  font-family: var(--font-text);
-  letter-spacing: var(--ls-body);
-  color: var(--color-ink);
-  background-color: var(--color-canvas);
-  height: 44px;                                /* Apple 터치 타깃 */
-  transition: border-color var(--transition-base), outline var(--transition-fast);
-  appearance: none;
-  -webkit-appearance: none;
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
 }
 
 .input-field::placeholder {
-  color: var(--color-ink-48);
-  font-weight: var(--font-weight-normal);
+  color: var(--color-gray-400);
 }
 
 .input-field:focus {
-  outline: 2px solid var(--color-primary-focus);
-  outline-offset: 0;
-  border-color: transparent;
-  box-shadow: none;
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
 }
 
 .input-field:disabled {
-  background-color: var(--color-parchment);
-  color: var(--color-ink-48);
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-500);
   cursor: not-allowed;
 }
 
-/* ── Sizes ── */
+/* ===== Input Sizes ===== */
 .input-sm {
-  padding: 8px 14px;
+  padding: var(--spacing-2) var(--spacing-3);
   font-size: var(--font-size-sm);
-  height: 36px;
-}
-.input-lg {
-  padding: 14px 24px;
-  font-size: var(--font-size-lg);
-  height: 52px;
 }
 
-/* ── States ── */
+.input-lg {
+  padding: var(--spacing-4) var(--spacing-5);
+  font-size: var(--font-size-lg);
+}
+
+/* ===== Input States ===== */
+
+/* Error State */
 .input-field.error {
   border-color: var(--color-error);
-}
-.input-field.error:focus {
-  outline-color: var(--color-error);
+  background-color: rgba(231, 76, 60, 0.02);
 }
 
+.input-field.error:focus {
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+/* Success State */
 .input-field.success {
   border-color: var(--color-success);
 }
 
-/* ── Messages ── */
+.input-field.success:focus {
+  box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+}
+
+/* ===== Error Message ===== */
 .input-error {
   color: var(--color-error);
   font-size: var(--font-size-sm);
-  letter-spacing: var(--ls-caption);
-  margin-top: var(--spacing-1);
-}
-.input-hint {
-  color: var(--color-ink-48);
-  font-size: var(--font-size-sm);
-  letter-spacing: var(--ls-caption);
   margin-top: var(--spacing-1);
 }
 
-/* ── Icon ── */
-.input-icon-left  { padding-left: var(--spacing-10); }
-.input-icon-right { padding-right: var(--spacing-10); }
+/* ===== Helper Text ===== */
+.input-hint {
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-1);
+}
+
+/* ===== Input Icon ===== */
+.input-icon-left {
+  padding-left: var(--spacing-10);
+}
+
+.input-icon-right {
+  padding-right: var(--spacing-10);
+}
 
 .input-icon {
   position: absolute;
@@ -106,39 +110,42 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  color: var(--color-ink-48);
+  color: var(--color-gray-500);
   pointer-events: none;
 }
-.input-icon.left  { left: 0; }
-.input-icon.right { right: 0; }
 
-/* ── Textarea ── */
+.input-icon.left {
+  left: 0;
+}
+
+.input-icon.right {
+  right: 0;
+}
+
+/* ===== Textarea ===== */
 .textarea {
   resize: vertical;
   min-height: 100px;
-  border-radius: var(--radius-sm);             /* pill 대신 8px */
-  height: auto;
-  padding: 12px 16px;
 }
 
-/* ── Select ── */
+/* ===== Select ===== */
 .select-field {
   appearance: none;
-  -webkit-appearance: none;
-  border-radius: var(--radius-sm);             /* 8px — select는 pill보다 rect */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237a7a7a' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-  background-position: right 14px center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right var(--spacing-3) center;
   background-repeat: no-repeat;
-  padding-right: 36px;
+  background-size: 1.5em 1.5em;
+  padding-right: var(--spacing-10);
 }
 
-/* ── Checkbox & Radio ── */
+/* ===== Checkbox & Radio ===== */
 .checkbox-group,
 .radio-group {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
 }
+
 .checkbox,
 .radio {
   display: flex;
@@ -146,6 +153,12 @@
   gap: var(--spacing-2);
   cursor: pointer;
 }
+
+.checkbox input[type="checkbox"],
+.radio input[type="radio"] {
+  cursor: pointer;
+}
+
 .checkbox label,
 .radio label {
   margin: 0;
@@ -153,33 +166,33 @@
   cursor: pointer;
 }
 
-/* ── Input + Button Group ── */
+/* ===== Input Group (With Button) ===== */
 .input-addon-group {
   display: flex;
-  border-radius: var(--radius-full);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-gray-300);
   overflow: hidden;
 }
+
 .input-addon-group .input-field {
   border: none;
   flex: 1;
   border-radius: 0;
-  outline: none;
 }
+
 .input-addon-group .input-field:focus {
-  outline: none;
   box-shadow: none;
 }
+
 .input-addon-group button {
   border: none;
-  padding: 10px var(--spacing-4);
-  background-color: var(--color-primary);
-  color: var(--color-on-dark);
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-700);
   cursor: pointer;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-normal);
-  transition: background-color var(--transition-fast);
+  transition: background-color var(--transition-base);
 }
+
 .input-addon-group button:hover {
-  background-color: var(--color-primary-dark);
+  background-color: var(--color-gray-200);
 }

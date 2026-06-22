@@ -1,111 +1,131 @@
-/* ===== Card — Apple store-utility-card ===== */
+/* Card 컴포넌트 스타일 */
 
-/* ── Base ── */
-/* Apple: 카드에 그림자 없음 — hairline border만 */
 .card {
-  background-color: var(--color-canvas);
-  border: var(--border-utility);              /* 1px #e0e0e0 */
-  border-radius: var(--radius-lg);            /* 18px */
-  padding: var(--spacing-6);                  /* 24px */
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
   overflow: hidden;
-  /* NO box-shadow: Apple card elevation = hairline border only */
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-gray-300);
 }
 
 .card.interactive {
   cursor: pointer;
-  transition: opacity var(--transition-base);
 }
-.card.interactive:hover { opacity: 0.92; }
 
-/* ── Card Header ── */
+.card.interactive:hover {
+  transform: translateY(-2px);
+}
+
+/* ===== Card Header ===== */
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--spacing-4);
   padding-bottom: var(--spacing-4);
-  border-bottom: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--color-gray-200);
 }
 
 .card-header-title {
-  font-family: var(--font-display);
-  font-size: var(--font-size-base);           /* 17px */
-  font-weight: var(--font-weight-semibold);   /* 600 */
-  letter-spacing: var(--ls-body);
-  color: var(--color-ink);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
 }
 
-/* ── Card Body ── */
-.card-body { margin-bottom: var(--spacing-4); }
-.card-body:last-child { margin-bottom: 0; }
+/* ===== Card Body ===== */
+.card-body {
+  margin-bottom: var(--spacing-4);
+}
 
-/* ── Card Footer ── */
+.card-body:last-child {
+  margin-bottom: 0;
+}
+
+/* ===== Card Footer ===== */
 .card-footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
   margin-top: var(--spacing-4);
   padding-top: var(--spacing-4);
-  border-top: 1px solid var(--color-divider);
+  border-top: 1px solid var(--color-gray-200);
 }
 
-/* ── Variants ── */
-/* Parchment (light-section 카드) */
+/* ===== Card Variants ===== */
+
+/* Primary Card */
 .card-primary {
-  background-color: var(--color-parchment);
-  border-color: var(--color-hairline);
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.05), transparent);
 }
 
-/* Team A */
+.card-primary .card-header {
+  border-bottom-color: var(--color-primary);
+}
+
+/* Team A Card (Blue) */
 .card-team-a {
-  border-left: 3px solid var(--color-team-a);
+  border-left: 4px solid var(--color-team-a);
+  background-color: rgba(52, 152, 219, 0.02);
 }
 
-/* Team B */
+/* Team B Card (Red) */
 .card-team-b {
-  border-left: 3px solid var(--color-team-b);
+  border-left: 4px solid var(--color-team-b);
+  background-color: rgba(231, 76, 60, 0.02);
 }
 
-/* Dark tile card */
-.card-dark {
-  background-color: var(--color-tile-dark-1);
-  border-color: rgba(255,255,255,0.08);
-  color: var(--color-on-dark);
-}
-.card-dark .card-header        { border-bottom-color: rgba(255,255,255,0.08); }
-.card-dark .card-footer        { border-top-color:    rgba(255,255,255,0.08); }
-.card-dark .card-header-title  { color: var(--color-on-dark); }
+/* ===== Card Sizes ===== */
 
-/* ── Sizes ── */
-.card-sm  { padding: var(--spacing-4); }
-.card-lg  { padding: var(--spacing-8); }
+.card-sm {
+  padding: var(--spacing-4);
+}
+
+.card-lg {
+  padding: var(--spacing-8);
+}
+
+/* ===== Compact Card ===== */
 .card-compact {
   padding: var(--spacing-3) var(--spacing-4);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-base);
 }
+
 .card-compact .card-header {
   margin-bottom: var(--spacing-2);
   padding-bottom: var(--spacing-2);
 }
 
-/* ── Card Grid ── */
+/* ===== Card Grid ===== */
 .card-grid {
   display: grid;
-  gap: var(--spacing-5);                      /* 20px — Apple 유틸 그리드 거터 */
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-6);
 }
 
-@media (max-width: 834px) {
-  .card-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 640px) {
-  .card-grid { grid-template-columns: 1fr; }
+@media (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* ── Disabled ── */
+@media (max-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===== Disabled Card ===== */
 .card.disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   pointer-events: none;
-  background-color: var(--color-parchment);
+  background-color: var(--color-gray-100);
 }

@@ -1,84 +1,80 @@
-/* ===== Header — Apple Global Nav ===== */
+/* Header 컴포넌트 스타일 */
 
 .header {
-  background-color: var(--color-surface-black); /* 순수 블랙 */
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-gray-200);
+  box-shadow: var(--shadow-xs);
   position: sticky;
   top: 0;
   z-index: 100;
-  /* Apple: 헤더에는 그림자 없음, 색상 변화가 구분선 역할 */
 }
 
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1440px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-6);
-  height: 64px;
+  padding: var(--spacing-4);
+  height: 70px;
 }
 
-/* ── Logo ── */
+/* ===== Logo/Brand ===== */
 .header-logo {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  font-size: var(--font-size-xs);     /* 12px — nav-link */
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--ls-nav);
-  color: var(--color-on-dark);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
   text-decoration: none;
-  transition: opacity var(--transition-fast);
 }
-.header-logo:hover { opacity: 0.8; }
 
-.header-logo-icon  { font-size: 18px; line-height: 1; }
+.header-logo-icon {
+  font-size: 28px;
+}
 
-.header-logo-text  { display: flex; flex-direction: column; gap: 0; }
+.header-logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
 
 .header-logo-title {
-  font-size: var(--font-size-sm);     /* 14px */
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-on-dark);
-  line-height: 1;
-  letter-spacing: -0.1px;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
   margin: 0;
+  line-height: 1;
 }
 
 .header-logo-subtitle {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-normal);
-  color: var(--color-muted-dark);
-  line-height: 1;
-  letter-spacing: 0;
+  color: var(--color-gray-600);
   margin: 0;
+  line-height: 1;
 }
 
-/* ── Navigation ── */
+/* ===== Navigation ===== */
 .header-nav {
   display: flex;
   align-items: center;
-  gap: var(--spacing-5); /* ~20px 간격 */
+  gap: var(--spacing-6);
 }
 
 .header-nav a {
-  font-family: var(--font-text);
-  font-size: var(--font-size-sm);      /* 14px */
-  font-weight: var(--font-weight-normal);
-  letter-spacing: -0.1px;
-  color: var(--color-on-dark);
+  color: var(--color-gray-700);
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-base);
   text-decoration: none;
-  transition: opacity var(--transition-fast);
-  white-space: nowrap;
 }
 
 .header-nav a:hover,
 .header-nav a.active {
-  opacity: 0.8;
-  color: var(--color-on-dark);
+  color: var(--color-primary);
 }
 
-/* ── Actions ── */
+/* ===== Header Actions ===== */
 .header-actions {
   display: flex;
   align-items: center;
@@ -92,64 +88,68 @@
 }
 
 .header-user-name {
-  max-width: 160px;
+  max-width: 120px;
   overflow: hidden;
+  color: var(--color-gray-700);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-normal);
-  letter-spacing: var(--ls-caption);
-  color: var(--color-on-dark);
+  font-weight: var(--font-weight-semibold);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ── Mobile Menu Button ── */
+/* ===== Mobile Menu Button ===== */
 .header-menu-btn {
   display: none;
   background: none;
   border: none;
   cursor: pointer;
   padding: var(--spacing-2);
-  color: var(--color-on-dark);
-  font-size: 20px;
-  line-height: 1;
-  opacity: 0.9;
-  transition: opacity var(--transition-fast);
+  color: var(--color-gray-700);
+  font-size: 24px;
 }
-.header-menu-btn:hover { opacity: 1; }
 
-/* ── Mobile ── */
-@media (max-width: 834px) {
+/* ===== Mobile Responsive ===== */
+@media (max-width: 768px) {
   .header-content {
-    padding: 0 var(--spacing-4);
-    height: 64px;
+    padding: var(--spacing-3) var(--spacing-4);
+    height: 60px;
   }
 
-  .header-logo-text { display: none; }
+  .header-logo {
+    gap: var(--spacing-1);
+  }
 
-  .header-nav { display: none; }
+  .header-logo-text {
+    display: none;
+  }
 
-  .header-menu-btn { display: block; }
+  .header-nav {
+    display: none;
+  }
+
+  .header-menu-btn {
+    display: block;
+  }
 
   .header-nav.mobile-visible {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     position: absolute;
-    top: 64px;
+    top: 60px;
     left: 0;
     right: 0;
-    background-color: rgba(0, 0, 0, 0.94);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    padding: var(--spacing-6) var(--spacing-6);
-    gap: var(--spacing-4);
+    background-color: var(--color-white);
+    border-bottom: 1px solid var(--color-gray-200);
+    padding: var(--spacing-4);
+    gap: var(--spacing-3);
+    box-shadow: var(--shadow-md);
   }
 
-  .header-nav.mobile-visible a {
-    font-size: var(--font-size-base); /* 모바일에서는 17px */
-    letter-spacing: var(--ls-body);
+  .header-actions {
+    gap: var(--spacing-2);
   }
 
-  .header-actions { gap: var(--spacing-2); }
-  .header-user-name { max-width: 64px; }
+  .header-user-name {
+    max-width: 72px;
+  }
 }

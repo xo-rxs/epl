@@ -1,49 +1,48 @@
-/* ===== Home Page — Apple Full-Bleed Tile Layout ===== */
+/* ===== 홈 페이지 스타일 ===== */
 
-/* ── Hero Tile (Light) ── */
-/* Apple product-tile-light: white canvas, 80px padding, centered stack */
+/* 히어로 섹션 */
 .home-hero {
   text-align: center;
-  padding: 48px var(--spacing-6) var(--spacing-20);
-  background-color: var(--color-canvas);
-  /* 풀 블리드: 타일 경계는 색상 변화 자체 */
+  padding: var(--spacing-16) var(--spacing-4) var(--spacing-12);
+  background: linear-gradient(160deg, #f0fdf4 0%, #ffffff 60%);
+  margin-top: calc(-1 * var(--spacing-8));
   margin-left: calc(-50vw + 50%);
   margin-right: calc(-50vw + 50%);
-  margin-top: 0;
 }
 
 .home-hero__badge {
   display: inline-block;
-  padding: 8px 16px;
-  background-color: var(--color-parchment);
-  color: var(--color-ink-80);
-  border-radius: var(--radius-full);           /* pill */
-  font-size: var(--font-size-sm);              /* 14px */
-  font-weight: var(--font-weight-normal);
-  letter-spacing: var(--ls-caption);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: rgba(46, 204, 113, 0.12);
+  color: var(--color-primary-dark);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   margin-bottom: var(--spacing-6);
-  border: 1px solid var(--color-hairline);
+  border: 1px solid rgba(46, 204, 113, 0.25);
 }
 
 .home-hero__title {
-  font-family: var(--font-display);
-  font-size: clamp(2.125rem, 5vw, 3.5rem);    /* 34px → 56px */
-  font-weight: var(--font-weight-semibold);    /* 600 */
-  line-height: var(--line-height-hero);
-  letter-spacing: var(--ls-hero);             /* -0.28px */
-  color: var(--color-ink);
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  color: var(--color-gray-900);
   margin-bottom: var(--spacing-5);
+  letter-spacing: -0.02em;
 }
 
-/* 강조 텍스트: Action Blue, 그라디언트 없음 */
-.home-hero__accent { color: var(--color-primary); }
+.home-hero__accent {
+  color: var(--color-primary-dark);
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
 .home-hero__desc {
-  font-size: var(--font-size-xl);              /* 21px — lead */
-  font-weight: var(--font-weight-normal);
-  line-height: 1.5;
-  letter-spacing: 0.1px;
-  color: var(--color-ink-48);
+  font-size: var(--font-size-lg);
+  color: var(--color-gray-600);
+  line-height: var(--line-height-relaxed);
   margin-bottom: var(--spacing-8);
   max-width: 520px;
   margin-left: auto;
@@ -59,29 +58,24 @@
   margin-bottom: var(--spacing-12);
 }
 
-/* ghost CTA (Learn more style) */
 .home-hero__ghost-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
   background: none;
   border: none;
   cursor: pointer;
-  font-family: var(--font-text);
-  font-size: var(--font-size-base);            /* 17px */
-  font-weight: var(--font-weight-normal);
-  letter-spacing: var(--ls-body);
-  color: var(--color-primary);
-  padding: 11px 0;
-  transition: opacity var(--transition-fast);
-}
-.home-hero__ghost-btn:hover { opacity: 0.8; }
-.home-hero__ghost-btn::after {
-  content: " ›";
-  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-700);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-base);
+  transition: color var(--transition-base), background var(--transition-base);
 }
 
-/* ── Stats (Parchment) ── */
+.home-hero__ghost-btn:hover {
+  color: var(--color-primary-dark);
+  background: rgba(46, 204, 113, 0.08);
+}
+
+/* 통계 배지 */
 .home-stats {
   display: flex;
   align-items: center;
@@ -89,11 +83,12 @@
   gap: var(--spacing-8);
   flex-wrap: wrap;
   padding: var(--spacing-6) var(--spacing-8);
-  background: var(--color-parchment);
-  border-radius: var(--radius-lg);             /* 18px */
-  border: var(--border-utility);
-  max-width: 560px;
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  max-width: 520px;
   margin: 0 auto;
+  border: 1px solid var(--color-gray-100);
 }
 
 .home-stats__item {
@@ -104,31 +99,22 @@
 }
 
 .home-stats__value {
-  font-family: var(--font-display);
-  font-size: var(--font-size-2xl);             /* 28px */
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-dark);
   line-height: 1;
-  letter-spacing: var(--ls-hero);
-  color: var(--color-ink);
 }
 
 .home-stats__label {
-  font-size: var(--font-size-xs);              /* 12px */
-  letter-spacing: var(--ls-nav);
-  color: var(--color-ink-48);
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-500);
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
 }
 
-/* ── Features Tile (Parchment) ── */
-/* Apple product-tile-parchment 스타일 */
+/* 기능 섹션 */
 .home-features {
-  padding: var(--spacing-20) var(--spacing-6); /* 80px */
-  background-color: var(--color-parchment);
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-}
-
-.home-features__inner {
+  padding: var(--spacing-16) var(--spacing-4);
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -139,137 +125,139 @@
 }
 
 .home-features__title {
-  font-family: var(--font-display);
-  font-size: var(--font-size-4xl);             /* 40px */
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--ls-display);
-  color: var(--color-ink);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
   margin-bottom: var(--spacing-3);
+  letter-spacing: -0.01em;
 }
 
 .home-features__subtitle {
-  font-size: var(--font-size-2xl);             /* 28px */
-  font-weight: var(--font-weight-normal);
-  line-height: var(--line-height-heading);
-  letter-spacing: 0.196px;
-  color: var(--color-ink-48);
+  font-size: var(--font-size-lg);
+  color: var(--color-gray-500);
 }
 
 .home-features__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--spacing-5);                       /* 20px — Apple 그리드 거터 */
+  gap: var(--spacing-5);
 }
 
-/* ── Feature Card (store-utility-card) ── */
+/* 기능 카드 */
 .home-feature-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-  padding: var(--spacing-6);                   /* 24px */
-  background: var(--color-canvas);
-  border: var(--border-utility);               /* 1px hairline */
-  border-radius: var(--radius-lg);             /* 18px */
+  padding: var(--spacing-8);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: opacity var(--transition-base);
+  transition: box-shadow var(--transition-base), transform var(--transition-base), border-color var(--transition-base);
   font-family: inherit;
   gap: var(--spacing-3);
-  /* Apple: 카드에 그림자 없음 */
 }
-.home-feature-card:hover { opacity: 0.85; }
+
+.home-feature-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+  border-color: var(--color-gray-300);
+}
 
 .home-feature-card__icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-sm);             /* 8px */
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.65rem;
-  font-weight: var(--font-weight-semibold);
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-bold);
   letter-spacing: -0.01em;
   margin-bottom: var(--spacing-2);
   flex-shrink: 0;
 }
 
 .home-feature-card__title {
-  font-family: var(--font-display);
-  font-size: var(--font-size-base);            /* 17px */
-  font-weight: var(--font-weight-semibold);    /* 600 */
-  letter-spacing: var(--ls-body);
-  color: var(--color-ink);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
   margin: 0;
 }
 
 .home-feature-card__desc {
-  font-size: var(--font-size-sm);              /* 14px */
-  letter-spacing: var(--ls-caption);
-  line-height: var(--line-height-normal);
-  color: var(--color-ink-48);
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-600);
+  line-height: var(--line-height-relaxed);
   flex: 1;
 }
 
 .home-feature-card__cta {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-normal);
-  color: var(--color-primary);
-  letter-spacing: var(--ls-caption);
+  font-weight: var(--font-weight-semibold);
   margin-top: var(--spacing-2);
+  transition: letter-spacing var(--transition-base);
 }
-.home-feature-card__cta::after { content: " ›"; }
 
-/* ── CTA Tile (Dark) ── */
-/* Apple product-tile-dark */
+.home-feature-card:hover .home-feature-card__cta {
+  letter-spacing: 0.03em;
+}
+
+/* CTA 섹션 */
 .home-cta {
   text-align: center;
-  padding: var(--spacing-20) var(--spacing-6); /* 80px */
-  background-color: var(--color-tile-dark-1);  /* #272729 */
+  padding: var(--spacing-16) var(--spacing-4);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  margin-top: var(--spacing-12);
   margin-left: calc(-50vw + 50%);
   margin-right: calc(-50vw + 50%);
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-bottom: calc(-1 * var(--spacing-8));
 }
 
 .home-cta__title {
-  font-family: var(--font-display);
-  font-size: clamp(2.125rem, 3vw, 2.5rem);    /* 34-40px */
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--ls-body);
-  line-height: var(--line-height-tight);
-  color: var(--color-on-dark);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-white);
   margin-bottom: var(--spacing-4);
 }
 
 .home-cta__desc {
-  font-size: var(--font-size-2xl);             /* 28px */
-  font-weight: var(--font-weight-normal);
-  line-height: var(--line-height-heading);
-  color: var(--color-muted-dark);
+  font-size: var(--font-size-lg);
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: var(--spacing-8);
 }
 
-/* ── Responsive ── */
-@media (max-width: 834px) {
-  .home-hero, .home-features, .home-cta {
-    padding-top: var(--spacing-12);            /* 48px — 모바일 tighter padding */
-    padding-bottom: var(--spacing-12);
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .home-hero {
+    margin-top: calc(-1 * var(--spacing-6));
   }
 }
 
 @media (max-width: 640px) {
-  .home-hero { padding: var(--spacing-10) var(--spacing-4) var(--spacing-8); }
-
-  .home-hero__title { font-size: 2.125rem; } /* 34px on mobile */
+  .home-hero {
+    padding: var(--spacing-10) var(--spacing-4) var(--spacing-8);
+  }
 
   .home-stats {
     gap: var(--spacing-6);
     padding: var(--spacing-5) var(--spacing-6);
   }
 
-  .home-features { padding: var(--spacing-10) var(--spacing-4); }
-  .home-features__grid { grid-template-columns: 1fr; }
+  .home-features {
+    padding: var(--spacing-10) var(--spacing-4);
+  }
 
-  .home-cta { padding: var(--spacing-12) var(--spacing-4); }
-  .home-cta__title { font-size: 1.875rem; }
+  .home-features__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-feature-card {
+    padding: var(--spacing-6);
+  }
+
+  .home-cta {
+    padding: var(--spacing-12) var(--spacing-4);
+  }
 }
