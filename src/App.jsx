@@ -70,7 +70,6 @@ function App() {
     const headerActions = (
       <Button
         variant="primary"
-        size="sm"
         onClick={() => navigateTo('match', '/?page=match')}
       >
         시작하기

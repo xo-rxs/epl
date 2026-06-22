@@ -1,100 +1,144 @@
-/* 
-  CSS 변수 정의
-  색상, 간격, 타이포그래피, 그림자 등 디자인 토큰
-*/
+/* ===== Apple Design System — EPL 디자인 토큰 ===== */
+/* DESIGN.md (apple) 기반 */
 
 :root {
   color-scheme: light;
-  /* 색상 - Primary (축구 테마) */
-  --color-primary: #2ecc71;
-  --color-primary-dark: #27ae60;
-  --color-primary-light: #a9dfbf;
 
-  /* 색상 - Secondary (팀 구분) */
-  --color-team-a: #3498db;
-  --color-team-b: #e74c3c;
+  /* ── Brand & Accent ── */
+  --color-primary:        #0066cc;   /* Action Blue — 모든 인터랙티브 요소 */
+  --color-primary-focus:  #0071e3;   /* 키보드 포커스 링 */
+  --color-primary-dark:   #004fa3;   /* active/press 상태 */
+  --color-primary-on-dark:#2997ff;   /* 다크 타일 위 링크 */
 
-  /* 색상 - Neutral */
-  --color-white: #ffffff;
-  --color-gray-50: #f8f9fa;
-  --color-gray-100: #f1f3f5;
-  --color-gray-200: #e9ecef;
-  --color-gray-300: #dee2e6;
-  --color-gray-400: #ced4da;
-  --color-gray-500: #adb5bd;
-  --color-gray-600: #6c757d;
-  --color-gray-700: #495057;
-  --color-gray-800: #343a40;
-  --color-gray-900: #212529;
-  --color-black: #000000;
+  /* ── Surface (Light) ── */
+  --color-canvas:         #ffffff;   /* 기본 캔버스 */
+  --color-parchment:      #f5f5f7;   /* Apple 시그니처 오프화이트 */
+  --color-pearl:          #fafafc;   /* ghost 버튼 배경 */
 
-  /* 색상 - Status */
-  --color-success: #27ae60;
-  --color-warning: #f39c12;
-  --color-error: #e74c3c;
-  --color-info: #3498db;
+  /* ── Surface (Dark) ── */
+  --color-tile-dark-1:    #272729;   /* 다크 타일 1 (기본) */
+  --color-tile-dark-2:    #2a2a2c;   /* 다크 타일 2 (미세 분리) */
+  --color-tile-dark-3:    #252527;   /* 다크 타일 3 (하단/영상) */
+  --color-surface-black:  #000000;   /* 글로벌 nav / void */
 
-  /* 타이포그래피 */
-  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  --font-size-xs: 0.75rem;    /* 12px */
-  --font-size-sm: 0.875rem;   /* 14px */
-  --font-size-base: 1rem;     /* 16px */
-  --font-size-lg: 1.125rem;   /* 18px */
-  --font-size-xl: 1.25rem;    /* 20px */
-  --font-size-2xl: 1.5rem;    /* 24px */
-  --font-size-3xl: 1.875rem;  /* 30px */
-  --font-size-4xl: 2.25rem;   /* 36px */
+  /* ── Text ── */
+  --color-ink:            #1d1d1f;   /* 기본 텍스트 (헤드라인/바디) */
+  --color-ink-80:         #333333;   /* Pearl 버튼 텍스트 */
+  --color-ink-48:         #7a7a7a;   /* 비활성/법적고지 */
+  --color-on-dark:        #ffffff;   /* 다크 타일 텍스트 */
+  --color-muted-dark:     #cccccc;   /* 다크 타일 서브 텍스트 */
 
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
+  /* 기존 코드 호환 alias */
+  --color-white:          #ffffff;
+  --color-black:          #000000;
+  --color-gray-50:        #f5f5f7;   /* → parchment */
+  --color-gray-100:       #f5f5f7;
+  --color-gray-200:       #e0e0e0;   /* → hairline */
+  --color-gray-300:       #d2d2d7;
+  --color-gray-400:       #cccccc;
+  --color-gray-500:       #7a7a7a;
+  --color-gray-600:       #7a7a7a;
+  --color-gray-700:       #333333;
+  --color-gray-800:       #1d1d1f;
+  --color-gray-900:       #1d1d1f;
+
+  /* ── Borders & Dividers ── */
+  --color-hairline:       #e0e0e0;   /* 유틸 카드 1px 테두리 */
+  --color-divider:        #f0f0f0;   /* 소프트 구분선 */
+  --color-chip-gray:      #d2d2d7;   /* 원형 컨트롤 칩 */
+
+  /* 팀 색상 (기존 유지) */
+  --color-team-a:         #3498db;
+  --color-team-b:         #e74c3c;
+  --color-success:        #27ae60;
+  --color-warning:        #f39c12;
+  --color-error:          #e74c3c;
+
+  /* ── Typography ── */
+  /* SF Pro는 macOS/iOS에서 system-ui로 자동 해석됨 */
+  --font-display:  "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-text:     "SF Pro Text",    system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-base: var(--font-text);
+
+  /* Font sizes (Apple 기준) */
+  --font-size-hero:   3.5rem;    /* 56px — hero-display */
+  --font-size-4xl:    2.5rem;    /* 40px — display-lg */
+  --font-size-3xl:    2.125rem;  /* 34px — display-md */
+  --font-size-2xl:    1.75rem;   /* 28px — lead */
+  --font-size-xl:     1.5rem;    /* 24px — lead-airy */
+  --font-size-lg:     1.3125rem; /* 21px — tagline */
+  --font-size-base:   1.0625rem; /* 17px — body (Apple: 17, not 16) */
+  --font-size-sm:     0.875rem;  /* 14px — caption */
+  --font-size-xs:     0.75rem;   /* 12px — nav-link / fine-print */
+  --font-size-2xs:    0.625rem;  /* 10px — micro-legal */
+
+  /* Font weights (Apple ladder: 300 / 400 / 600 — 500 없음) */
+  --font-weight-light:    300;
+  --font-weight-normal:   400;
+  --font-weight-medium:   400;  /* Apple에서 500 없음 → 400로 폴백 */
   --font-weight-semibold: 600;
-  --font-weight-bold: 700;
+  --font-weight-bold:     600;  /* Apple headline은 600 */
 
-  --line-height-tight: 1.2;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.75;
+  /* Line heights */
+  --line-height-hero:    1.07;
+  --line-height-tight:   1.1;
+  --line-height-heading: 1.19;
+  --line-height-normal:  1.47;  /* Apple body */
+  --line-height-relaxed: 2.41;  /* 푸터 링크 */
 
-  /* 간격 (Spacing Scale) */
-  --spacing-0: 0;
-  --spacing-1: 0.25rem;   /* 4px */
-  --spacing-2: 0.5rem;    /* 8px */
-  --spacing-3: 0.75rem;   /* 12px */
-  --spacing-4: 1rem;      /* 16px */
-  --spacing-5: 1.25rem;   /* 20px */
-  --spacing-6: 1.5rem;    /* 24px */
-  --spacing-8: 2rem;      /* 32px */
-  --spacing-10: 2.5rem;   /* 40px */
-  --spacing-12: 3rem;     /* 48px */
-  --spacing-16: 4rem;     /* 64px */
+  /* Letter spacing (Apple "tight" 헤드라인 시그니처) */
+  --ls-hero:     -0.28px;
+  --ls-display:   0px;
+  --ls-body:     -0.374px;
+  --ls-caption:  -0.224px;
+  --ls-nav:      -0.12px;
 
-  /* 테두리 반경 */
+  /* ── Spacing (8px base grid) ── */
+  --spacing-0:  0;
+  --spacing-1:  0.25rem;   /* 4px  — xxs */
+  --spacing-2:  0.5rem;    /* 8px  — xs  */
+  --spacing-3:  0.75rem;   /* 12px — sm  */
+  --spacing-4:  1.0625rem; /* 17px — md (Apple rhythm unit) */
+  --spacing-5:  1.25rem;   /* 20px */
+  --spacing-6:  1.5rem;    /* 24px — lg (카드 패딩) */
+  --spacing-8:  2rem;      /* 32px — xl */
+  --spacing-10: 2.5rem;    /* 40px */
+  --spacing-12: 3rem;      /* 48px — xxl */
+  --spacing-16: 4rem;      /* 64px */
+  --spacing-20: 5rem;      /* 80px — section */
+
+  /* ── Border Radius (Apple scale) ── */
   --radius-none: 0;
-  --radius-sm: 0.25rem;   /* 4px */
-  --radius-base: 0.5rem;  /* 8px */
-  --radius-md: 0.75rem;   /* 12px */
-  --radius-lg: 1rem;      /* 16px */
-  --radius-xl: 1.5rem;    /* 24px */
-  --radius-full: 9999px;
+  --radius-xs:   5px;    /* 인라인 칩 (rare) */
+  --radius-sm:   8px;    /* 유틸리티 버튼, 이미지 */
+  --radius-base: 8px;    /* = sm (기존 코드 호환) */
+  --radius-md:   11px;   /* Pearl ghost 버튼 */
+  --radius-lg:   18px;   /* 유틸 카드, 액세서리 그리드 */
+  --radius-xl:   18px;   /* = lg */
+  --radius-full: 9999px; /* 필 CTA, 서치 인풋 — Apple 시그니처 */
 
-  /* 그림자 */
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  /* ── Elevation ── */
+  /* Apple: 카드/버튼/텍스트에는 그림자 없음 */
+  /* 제품 이미지에만 단 하나의 그림자 */
+  --shadow-product: rgba(0, 0, 0, 0.22) 3px 5px 30px 0;
+  --shadow-xs:  none;   /* 기존 호환 */
+  --shadow-sm:  none;
+  --shadow-base:none;
+  --shadow-md:  none;
+  --shadow-lg:  none;
+  --shadow-xl:  none;
+  /* hairline border (utility cards) */
+  --border-utility: 1px solid var(--color-hairline);
 
-  /* 전환/애니메이션 */
+  /* ── Transitions ── */
   --transition-fast: 150ms ease-in-out;
   --transition-base: 200ms ease-in-out;
   --transition-slow: 300ms ease-in-out;
 
-  /* 브레이크포인트 (모바일 우선) */
-  --breakpoint-sm: 640px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --breakpoint-xl: 1280px;
+  /* ── Breakpoints ── */
+  --breakpoint-sm:  640px;
+  --breakpoint-md:  834px;   /* Apple: tablet collapse */
+  --breakpoint-lg:  1068px;  /* Apple: small desktop */
+  --breakpoint-xl:  1440px;  /* Apple: content lock */
   --breakpoint-2xl: 1536px;
 }
