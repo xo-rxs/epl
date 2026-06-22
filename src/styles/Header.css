@@ -1,80 +1,84 @@
-/* Header 컴포넌트 스타일 */
+/* ===== Header — Apple Global Nav ===== */
 
 .header {
-  background-color: var(--color-white);
-  border-bottom: 1px solid var(--color-gray-200);
-  box-shadow: var(--shadow-xs);
+  background-color: var(--color-surface-black); /* 순수 블랙 */
   position: sticky;
   top: 0;
   z-index: 100;
+  /* Apple: 헤더에는 그림자 없음, 색상 변화가 구분선 역할 */
 }
 
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: var(--spacing-4);
-  height: 70px;
+  padding: 0 var(--spacing-6);
+  height: 64px;
 }
 
-/* ===== Logo/Brand ===== */
+/* ── Logo ── */
 .header-logo {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  font-size: var(--font-size-xs);     /* 12px — nav-link */
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--ls-nav);
+  color: var(--color-on-dark);
   text-decoration: none;
+  transition: opacity var(--transition-fast);
 }
+.header-logo:hover { opacity: 0.8; }
 
-.header-logo-icon {
-  font-size: 28px;
-}
+.header-logo-icon  { font-size: 18px; line-height: 1; }
 
-.header-logo-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
+.header-logo-text  { display: flex; flex-direction: column; gap: 0; }
 
 .header-logo-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  margin: 0;
+  font-size: var(--font-size-sm);     /* 14px */
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-on-dark);
   line-height: 1;
+  letter-spacing: -0.1px;
+  margin: 0;
 }
 
 .header-logo-subtitle {
-  font-size: var(--font-size-xs);
+  font-size: 11px;
   font-weight: var(--font-weight-normal);
-  color: var(--color-gray-600);
-  margin: 0;
+  color: var(--color-muted-dark);
   line-height: 1;
+  letter-spacing: 0;
+  margin: 0;
 }
 
-/* ===== Navigation ===== */
+/* ── Navigation ── */
 .header-nav {
   display: flex;
   align-items: center;
-  gap: var(--spacing-6);
+  gap: var(--spacing-5); /* ~20px 간격 */
 }
 
 .header-nav a {
-  color: var(--color-gray-700);
-  font-weight: var(--font-weight-medium);
-  transition: color var(--transition-base);
+  font-family: var(--font-text);
+  font-size: var(--font-size-sm);      /* 14px */
+  font-weight: var(--font-weight-normal);
+  letter-spacing: -0.1px;
+  color: var(--color-on-dark);
   text-decoration: none;
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
 }
 
 .header-nav a:hover,
 .header-nav a.active {
-  color: var(--color-primary);
+  opacity: 0.8;
+  color: var(--color-on-dark);
 }
 
-/* ===== Header Actions ===== */
+/* ── Actions ── */
 .header-actions {
   display: flex;
   align-items: center;
@@ -88,68 +92,64 @@
 }
 
 .header-user-name {
-  max-width: 120px;
+  max-width: 160px;
   overflow: hidden;
-  color: var(--color-gray-700);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: var(--ls-caption);
+  color: var(--color-on-dark);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ===== Mobile Menu Button ===== */
+/* ── Mobile Menu Button ── */
 .header-menu-btn {
   display: none;
   background: none;
   border: none;
   cursor: pointer;
   padding: var(--spacing-2);
-  color: var(--color-gray-700);
-  font-size: 24px;
+  color: var(--color-on-dark);
+  font-size: 20px;
+  line-height: 1;
+  opacity: 0.9;
+  transition: opacity var(--transition-fast);
 }
+.header-menu-btn:hover { opacity: 1; }
 
-/* ===== Mobile Responsive ===== */
-@media (max-width: 768px) {
+/* ── Mobile ── */
+@media (max-width: 834px) {
   .header-content {
-    padding: var(--spacing-3) var(--spacing-4);
-    height: 60px;
+    padding: 0 var(--spacing-4);
+    height: 64px;
   }
 
-  .header-logo {
-    gap: var(--spacing-1);
-  }
+  .header-logo-text { display: none; }
 
-  .header-logo-text {
-    display: none;
-  }
+  .header-nav { display: none; }
 
-  .header-nav {
-    display: none;
-  }
-
-  .header-menu-btn {
-    display: block;
-  }
+  .header-menu-btn { display: block; }
 
   .header-nav.mobile-visible {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     position: absolute;
-    top: 60px;
+    top: 64px;
     left: 0;
     right: 0;
-    background-color: var(--color-white);
-    border-bottom: 1px solid var(--color-gray-200);
-    padding: var(--spacing-4);
-    gap: var(--spacing-3);
-    box-shadow: var(--shadow-md);
+    background-color: rgba(0, 0, 0, 0.94);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    padding: var(--spacing-6) var(--spacing-6);
+    gap: var(--spacing-4);
   }
 
-  .header-actions {
-    gap: var(--spacing-2);
+  .header-nav.mobile-visible a {
+    font-size: var(--font-size-base); /* 모바일에서는 17px */
+    letter-spacing: var(--ls-body);
   }
 
-  .header-user-name {
-    max-width: 72px;
-  }
+  .header-actions { gap: var(--spacing-2); }
+  .header-user-name { max-width: 64px; }
 }

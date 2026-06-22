@@ -60,14 +60,13 @@ function Header({
               <a href="/?page=auth" className="header-user-name">
                 {currentUser.name}
               </a>
-              <Button variant="secondary" size="sm" onClick={logout}>
+              <Button variant="secondary" onClick={logout}>
                 로그아웃
               </Button>
             </div>
           ) : (
             <Button
               variant="secondary"
-              size="sm"
               onClick={() => {
                 window.location.href = '/?page=auth';
               }}

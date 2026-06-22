@@ -761,11 +761,9 @@ function MatchPage() {
             </div>
 
             {(() => {
-              // 비공개 경기는 목록에서 숨기고(링크로만 접근), 선택된 지역 필터를 적용한다.
               const visibleMatches = matches.filter(
                 (match) =>
-                  !match.isPrivate &&
-                  (selectedRegions.length === 0 || selectedRegions.includes(match.region))
+                  selectedRegions.length === 0 || selectedRegions.includes(match.region)
               );
 
               if (visibleMatches.length === 0) {
@@ -798,8 +796,6 @@ function MatchPage() {
                 {visibleMatches.map((match) => {
                   const badge = getMatchBadge(match);
                   const isImminent = badge.type === 'imminent';
-                  // 마감임박 경기는 빨간 테두리 + 옅은 빨간 배경으로 강조
-                  const baseBorderColor = isImminent ? 'var(--color-error)' : 'var(--color-gray-400)';
                   const metaRows = [
                     ['일시', formatMatchDate(match.datetime)],
                     ['장소', `${match.region ? `[${match.region}] ` : ''}${match.location}`],
@@ -811,41 +807,31 @@ function MatchPage() {
                     key={match.id}
                     onClick={() => goToView('join', match.id)}
                     style={{
-                      padding: 'var(--spacing-4)',
-                      backgroundColor: isImminent ? 'rgba(231, 76, 60, 0.04)' : 'var(--color-gray-50)',
-                      border: `2px solid ${baseBorderColor}`,
-                      borderRadius: 'var(--radius-base)',
+                      padding: 'var(--spacing-5)',
+                      backgroundColor: 'var(--color-canvas)',
+                      border: '1px solid var(--color-hairline)',
+                      borderRadius: 'var(--radius-lg)',
                       cursor: 'pointer',
-                      transition: 'all var(--transition-base)',
+                      transition: 'opacity var(--transition-base)',
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = isImminent
-                        ? '0 8px 20px rgba(231, 76, 60, 0.25)'
-                        : 'var(--shadow-lg)';
-                      e.currentTarget.style.transform = 'translateY(-4px)';
-                      e.currentTarget.style.borderColor = isImminent
-                        ? 'var(--color-error)'
-                        : 'var(--color-primary)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = 'none';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.borderColor = baseBorderColor;
-                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.85'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-2)' }}>
-                      <h4 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-bold)' }}>
+                      <h4 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-semibold)', letterSpacing: 'var(--ls-body)' }}>
                         {match.title}
                       </h4>
                       <span
                         style={{
                           flexShrink: 0,
-                          padding: 'var(--spacing-1) var(--spacing-2)',
+                          padding: '4px 10px',
                           backgroundColor: badge.color,
-                          color: 'var(--color-white)',
+                          color: '#ffffff',
                           borderRadius: 'var(--radius-full)',
-                          fontSize: 'var(--font-size-xs)',
-                          fontWeight: 'var(--font-weight-bold)',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          letterSpacing: '0.01em',
+                          whiteSpace: 'nowrap',
                         }}
                       >
                         {badge.label}
