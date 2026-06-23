@@ -28,10 +28,10 @@
   gap: var(--spacing-4);
   max-width: calc(100vw - var(--spacing-8));
   padding: var(--spacing-3) var(--spacing-5);
-  background: var(--color-ink);
+  background: var(--color-gray-900);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-lg);
-  color: var(--color-on-dark);
+  color: var(--color-white);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   animation: rv-toast-up 0.25s ease;
@@ -42,7 +42,7 @@
   padding: 0;
   background: none;
   border: none;
-  color: var(--color-primary-focus);
+  color: #2ecc71;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
@@ -65,8 +65,8 @@
   align-items: center;
   gap: var(--spacing-3);
   padding: var(--spacing-16);
-  background: var(--color-canvas);
-  border: 1px solid var(--color-hairline);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
   text-align: center;
 }
@@ -84,8 +84,8 @@
 
 /* ── 경기 선택 ── */
 .rv-match-select {
-  background: var(--color-canvas);
-  border: 1px solid var(--color-hairline);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
   padding: var(--spacing-5) var(--spacing-6);
   display: flex;
@@ -96,7 +96,7 @@
 .rv-select-label {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--color-ink-48);
+  color: var(--color-gray-500);
   letter-spacing: var(--ls-caption);
 }
 
@@ -108,11 +108,11 @@
   padding: 0 var(--spacing-10) 0 var(--spacing-4);
   border: 1px solid var(--color-gray-500);
   border-radius: var(--radius-base);
-  background: var(--color-canvas);
-  font-family: var(--font-text);
+  background: var(--color-white);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-normal);
-  color: var(--color-ink);
+  color: var(--color-gray-900);
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
@@ -126,7 +126,7 @@
 .rv-select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18);
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.18);
 }
 
 .rv-select-icon {
@@ -134,7 +134,7 @@
   right: var(--spacing-4);
   top: 50%;
   transform: translateY(-50%);
-  color: var(--color-ink-48);
+  color: var(--color-gray-500);
   pointer-events: none;
   font-size: var(--font-size-sm);
   line-height: 1;
@@ -142,8 +142,8 @@
 
 /* ── 진행률 ── */
 .rv-progress {
-  background: var(--color-canvas);
-  border: 1px solid var(--color-hairline);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
   padding: var(--spacing-5) var(--spacing-6);
   display: flex;
@@ -197,8 +197,8 @@
 
 /* ── 개별 선수 카드 ── */
 .rv-card {
-  background: var(--color-canvas);
-  border: 1px solid var(--color-hairline);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
   padding: var(--spacing-5) var(--spacing-6);
   display: flex;
@@ -208,12 +208,12 @@
 }
 
 .rv-card.is-fresh {
-  border-color: var(--color-hairline);
+  border-color: var(--color-gray-200);
 }
 
 .rv-card.is-done {
-  border-color: rgba(0, 102, 204, 0.25);
-  background: rgba(0, 102, 204, 0.02);
+  border-color: rgba(46, 204, 113, 0.4);
+  background: rgba(46, 204, 113, 0.02);
 }
 
 .rv-card__top {
@@ -342,8 +342,8 @@
 .rv-tag {
   padding: var(--spacing-2) var(--spacing-3);
   border-radius: var(--radius-full);
-  border: 1px solid var(--color-hairline);
-  background: var(--color-canvas);
+  border: 1px solid var(--color-gray-200);
+  background: var(--color-white);
   font-size: var(--font-size-xs);
   font-family: inherit;
   cursor: pointer;
@@ -353,7 +353,7 @@
 
 .rv-tag--pos.is-active {
   border-color: var(--color-primary);
-  background: rgba(0, 102, 204, 0.08);
+  background: rgba(46, 204, 113, 0.1);
   color: var(--color-primary);
 }
 
@@ -377,8 +377,8 @@
   justify-content: space-between;
   gap: var(--spacing-4);
   padding: var(--spacing-4) var(--spacing-6);
-  background: var(--color-canvas);
-  border: 1px solid var(--color-hairline);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-lg);
 }
 
@@ -496,8 +496,8 @@
   align-items: center;
   gap: 2px;
   padding: var(--spacing-2) var(--spacing-3);
-  background: var(--color-canvas);
-  border: 1px solid var(--color-hairline);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.15s;

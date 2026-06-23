@@ -1,192 +1,165 @@
-/* ===== Button — Apple Design System ===== */
+/* Button 컴포넌트 스타일 */
 
-/* ── Base ── */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-2);
-  border: none;
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  font-family: var(--font-text);
-  font-weight: var(--font-weight-normal);
+  transition: all var(--transition-base);
   text-decoration: none;
   white-space: nowrap;
   user-select: none;
-  transition: transform var(--transition-fast), opacity var(--transition-fast);
-  /* Apple: 버튼에 box-shadow 없음 */
+
+  /* 기본 레이아웃 */
+  min-height: 40px;
 }
 
-/* Active/Press: Apple 시스템 공통 마이크로 인터랙션 */
-.btn:active { transform: scale(0.95); }
-
-/* Focus: 2px solid Action Blue */
-.btn:focus-visible {
-  outline: 2px solid var(--color-primary-focus);
-  outline-offset: 2px;
-}
-
-/* ── Primary Pill CTA ── */
-/* button-primary: Action Blue #0066cc + pill */
+/* ===== Primary Button ===== */
 .btn-primary {
   background-color: var(--color-primary);
-  color: var(--color-on-dark);
-  border-radius: var(--radius-full);          /* pill */
-  padding: 11px 22px;
-  font-size: var(--font-size-base);           /* 17px */
-  font-weight: var(--font-weight-normal);
-  letter-spacing: var(--ls-body);
-  min-height: 44px;
+  color: var(--color-white);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-xs);
 }
-.btn-primary:hover   { background-color: var(--color-primary-dark); }
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
 .btn-primary:disabled {
-  background-color: var(--color-chip-gray);
-  color: var(--color-ink-48);
+  background-color: var(--color-gray-300);
+  border-color: var(--color-gray-300);
+  color: var(--color-gray-600);
   cursor: not-allowed;
-  pointer-events: none;
+  box-shadow: none;
 }
 
-/* ── Secondary Ghost Pill ── */
-/* button-secondary-pill: 투명 + 파란 테두리 */
+/* ===== Secondary Button ===== */
 .btn-secondary {
-  background-color: transparent;
+  background-color: var(--color-white);
   color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  border-radius: var(--radius-full);
-  padding: 11px 22px;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-normal);
-  letter-spacing: var(--ls-body);
-  min-height: 44px;
+  border-color: var(--color-primary);
 }
-.btn-secondary:hover { background-color: rgba(0, 102, 204, 0.06); }
+
+.btn-secondary:hover {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary-dark);
+}
+
 .btn-secondary:disabled {
-  color: var(--color-ink-48);
-  border-color: var(--color-chip-gray);
+  color: var(--color-gray-600);
+  border-color: var(--color-gray-300);
+  background-color: var(--color-gray-100);
   cursor: not-allowed;
-  pointer-events: none;
 }
 
-/* ── Dark Utility (nav actions) ── */
-/* button-dark-utility: #1d1d1f + 8px radius */
-.btn-dark {
-  background-color: var(--color-ink);
-  color: var(--color-on-dark);
-  border-radius: var(--radius-sm);            /* 8px */
-  padding: 8px 15px;
-  font-size: var(--font-size-sm);             /* 14px */
-  font-weight: var(--font-weight-normal);
-  letter-spacing: var(--ls-caption);
-  min-height: 32px;
-}
-.btn-dark:hover { opacity: 0.85; }
-
-/* ── Pearl Capsule (secondary on cards) ── */
-/* button-pearl-capsule: #fafafc + 11px radius */
-.btn-ghost {
-  background-color: var(--color-pearl);
-  color: var(--color-ink-80);
-  border: 1.5px solid var(--color-divider);
-  border-radius: var(--radius-md);            /* 11px */
-  padding: 8px 14px;
-  font-size: var(--font-size-sm);             /* 14px */
-  font-weight: var(--font-weight-normal);
-  letter-spacing: var(--ls-caption);
-  min-height: 36px;
-}
-.btn-ghost:hover { background-color: var(--color-parchment); }
-
-/* ── Store Hero CTA (large) ── */
-.btn-hero {
-  background-color: var(--color-primary);
-  color: var(--color-on-dark);
-  border-radius: var(--radius-full);
-  padding: 14px 28px;
-  font-size: 18px;                            /* button-large */
-  font-weight: var(--font-weight-light);      /* 300 — Apple 희소 사용 */
-  min-height: 50px;
-}
-.btn-hero:hover { background-color: var(--color-primary-dark); }
-
-/* ── Danger ── */
+/* ===== Danger Button ===== */
 .btn-danger {
   background-color: var(--color-error);
-  color: var(--color-on-dark);
-  border-radius: var(--radius-full);
-  padding: 11px 22px;
-  font-size: var(--font-size-base);
-  min-height: 44px;
+  color: var(--color-white);
+  border-color: var(--color-error);
 }
-.btn-danger:hover   { background-color: #c0392b; }
+
+.btn-danger:hover {
+  background-color: #c0392b;
+  border-color: #c0392b;
+  box-shadow: var(--shadow-md);
+}
+
 .btn-danger:disabled {
-  background-color: var(--color-chip-gray);
-  color: var(--color-ink-48);
+  background-color: var(--color-gray-300);
+  border-color: var(--color-gray-300);
+  color: var(--color-gray-600);
   cursor: not-allowed;
 }
 
-/* ── Success ── */
+/* ===== Success Button ===== */
 .btn-success {
   background-color: var(--color-success);
-  color: var(--color-on-dark);
-  border-radius: var(--radius-full);
-  padding: 11px 22px;
-  font-size: var(--font-size-base);
-  min-height: 44px;
+  color: var(--color-white);
+  border-color: var(--color-success);
 }
-.btn-success:hover { background-color: #229954; }
 
-/* ── Sizes ── */
+.btn-success:hover {
+  background-color: #229954;
+  border-color: #229954;
+  box-shadow: var(--shadow-md);
+}
+
+/* ===== Button Sizes ===== */
 .btn-sm {
-  padding: 8px 15px;
+  padding: var(--spacing-2) var(--spacing-3);
   font-size: var(--font-size-sm);
   min-height: 32px;
-  border-radius: var(--radius-full);
 }
-.btn-lg {
-  padding: 14px 28px;
-  font-size: 18px;
-  font-weight: var(--font-weight-light);
-  min-height: 50px;
-}
-.btn-block { width: 100%; }
 
-/* ── Button Group ── */
+.btn-lg {
+  padding: var(--spacing-4) var(--spacing-6);
+  font-size: var(--font-size-lg);
+  min-height: 48px;
+}
+
+/* ===== Full Width Button ===== */
+.btn-block {
+  width: 100%;
+}
+
+/* ===== Button Group ===== */
 .btn-group {
   display: flex;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
   flex-wrap: wrap;
-  align-items: center;
 }
+
 .btn-group-vertical {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
 }
 
-/* ── Loading ── */
+/* ===== Loading State ===== */
 .btn.loading {
   pointer-events: none;
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
-/* ── Icon Button (circular) ── */
-/* button-icon-circular: 44×44 translucent chip */
-.btn-icon {
-  width: 44px;
-  height: 44px;
-  min-height: auto;
-  padding: 0;
+/* ===== Review Tag Button ===== */
+.review-tag-btn {
   border-radius: var(--radius-full);
-  background-color: rgba(210, 210, 215, 0.64); /* chip-translucent */
-  color: var(--color-ink);
+}
+
+/* ===== Icon Button ===== */
+.btn-icon {
+  padding: var(--spacing-3);
+  border-radius: var(--radius-base);
+  width: 40px;
+  height: 40px;
+  min-height: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
 }
-.btn-icon:hover { background-color: rgba(210, 210, 215, 0.8); }
-.btn-icon-sm { width: 32px; height: 32px; }
-.btn-icon-lg { width: 52px; height: 52px; }
 
-/* ── Review Tag ── */
-.review-tag-btn { border-radius: var(--radius-full); }
+.btn-icon-sm {
+  width: 32px;
+  height: 32px;
+  padding: var(--spacing-2);
+}
+
+.btn-icon-lg {
+  width: 48px;
+  height: 48px;
+  padding: var(--spacing-4);
+}

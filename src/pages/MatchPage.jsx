@@ -796,6 +796,7 @@ function MatchPage() {
                 {visibleMatches.map((match) => {
                   const badge = getMatchBadge(match);
                   const isImminent = badge.type === 'imminent';
+                  const baseBorderColor = isImminent ? 'var(--color-error)' : 'var(--color-gray-400)';
                   const metaRows = [
                     ['일시', formatMatchDate(match.datetime)],
                     ['장소', `${match.region ? `[${match.region}] ` : ''}${match.location}`],
@@ -807,31 +808,41 @@ function MatchPage() {
                     key={match.id}
                     onClick={() => goToView('join', match.id)}
                     style={{
-                      padding: 'var(--spacing-5)',
-                      backgroundColor: 'var(--color-canvas)',
-                      border: '1px solid var(--color-hairline)',
-                      borderRadius: 'var(--radius-lg)',
+                      padding: 'var(--spacing-4)',
+                      backgroundColor: isImminent ? 'rgba(231, 76, 60, 0.04)' : 'var(--color-gray-50)',
+                      border: `2px solid ${baseBorderColor}`,
+                      borderRadius: 'var(--radius-base)',
                       cursor: 'pointer',
-                      transition: 'opacity var(--transition-base)',
+                      transition: 'all var(--transition-base)',
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.85'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow = isImminent
+                        ? '0 8px 20px rgba(231, 76, 60, 0.25)'
+                        : 'var(--shadow-lg)';
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.borderColor = isImminent
+                        ? 'var(--color-error)'
+                        : 'var(--color-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = 'none';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.borderColor = baseBorderColor;
+                    }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-2)' }}>
-                      <h4 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-semibold)', letterSpacing: 'var(--ls-body)' }}>
+                      <h4 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-bold)' }}>
                         {match.title}
                       </h4>
                       <span
                         style={{
                           flexShrink: 0,
-                          padding: '4px 10px',
+                          padding: 'var(--spacing-1) var(--spacing-2)',
                           backgroundColor: badge.color,
-                          color: '#ffffff',
+                          color: 'var(--color-white)',
                           borderRadius: 'var(--radius-full)',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          letterSpacing: '0.01em',
-                          whiteSpace: 'nowrap',
+                          fontSize: 'var(--font-size-xs)',
+                          fontWeight: 'var(--font-weight-bold)',
                         }}
                       >
                         {badge.label}
